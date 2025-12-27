@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Road Rage 2d beta test</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+    background: black;
+    font-family: Courier, monospace;
+}
+body { display: flex; justify-content: center; align-items: center; }
+canvas { position: absolute; touch-action: none; }
+video { position: absolute; width: 500px; height: 700px; display: none; background: black; z-index: 10; }
+#startBox {
+    position: absolute;
+    width: 420px;
+    background: rgba(0,0,0,0.75);
+    border: 2px solid yellow;
+    color: #eee;
+    z-index: 20;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+#startBox h1 { color: yellow; font-size: 32px; margin: 10px 0 20px; }
+#rules { font-size: 18px; line-height: 1.5; margin-bottom: 20px; }
+#rules span { color: #00ffcc; }
+#tapBar { background: yellow; color: black; padding: 15px; font-size: 22px; font-weight: bold; animation: blink 1s infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+</head>
+
+<body>
+
+<canvas id="game" width="500" height="700"></canvas>
+
+<div id="startBox">
+    <h1>Road Rage 2d</h1>
+    <div id="rules">
+        TAP <span>LEFT</span> → MOVE LEFT<br><br>
+        TAP <span>RIGHT</span> → MOVE RIGHT<br><br>
+        AVOID INCOMING CARS<br>
+        SURVIVE AS LONG AS YOU CAN
+    </div>
+    <div id="tapBar">TAP TO PLAY</div>
+</div>
+
+<audio id="boxMusic" loop>
+    <source src="bg.mp3" type="audio/mp3">
+</audio>
+
+<video id="gameOverVideo" playsinline>
+    <source src="prank.mp4" type="video/mp4">
+</video>
+
+<script>
+document.addEventListener("touchmove", e => e.preventDefault(), { passive:false });
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const video = document.getElementById("gameOverVideo");
+const startBox = document.getElementById("startBox");
+const boxMusic = document.getElementById("boxMusic");
+
+const W = 500, H = 700;
+
+let car, enemies, roadLines;
+let speed, distance, score;
+let gameOver = false;
+let videoPlaying = false;
+let gameStarted = false;
+let moveDir = 0;
+
+function initGame() {
+    car = { x: W/2 - 20, y: H - 100, w: 40, h: 80 };
+    enemies = [];
+    roadLines = [];
+    speed = 3;
+    distance = 0;
+    score = 0;
+    gameOver = false;
+    videoPlaying = false;
+    for (let i=0;i<H;i+=100) roadLines.push({ x: W/2 -5, y:i, w:10, h:40 });
+}
+
+// PLAY BOX MUSIC FIRST
+boxMusic.play().catch(()=>{});
+
+startBox.addEventListener("click", startGame);
+startBox.addEventListener("touchstart", startGame);
+
+function startGame() {
+    startBox.style.display = "none";
+    gameStarted = true;
+    // stop box music
+    boxMusic.pause();
+    boxMusic.currentTime = 0;
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key==="ArrowLeft") moveDir=-1;
+    if (e.key==="ArrowRight") moveDir=1;
+});
+document.addEventListener("keyup",()=>moveDir=0);
+
+canvas.addEventListener("touchstart", e=>{
+    const x=e.touches[0].clientX;
+    moveDir = x < window.innerWidth/2 ? -1 : 1;
+}, { passive:false });
+
+canvas.addEventListener("touchend", ()=>moveDir=0, { passive:false });
+
+function hit(a,b){return a.x<a.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y;}
+
+function tvEffect(){
+    ctx.fillStyle="rgba(0,0,0,0.15)";
+    for(let y=0;y<H;y+=4) ctx.fillRect(0,y,W,2);
+}
+
+// GAME OVER VIDEO
+function playGameOverVideo(){
+    video.style.display="block";
+    video.currentTime=0;
+    video.play().catch(()=>{});
+}
+video.addEventListener("ended", ()=>{
+    video.style.display="none";
+    initGame();
+    gameStarted = true;
+    gameOver = false;
+    videoPlaying = false;
+});
+
+initGame();
+
+function loop(){
+    ctx.clearRect(0,0,W,H);
+
+    // ROAD
+    ctx.fillStyle="#141414";
+    ctx.fillRect(50,0,400,H);
+    ctx.fillStyle="#bbb";
+    roadLines.forEach(l=>{
+        l.y+=speed;
+        if(l.y>H) l.y=-100;
+        ctx.fillRect(l.x,l.y,l.w,l.h);
+    });
+
+    if(gameStarted && !gameOver){
+        car.x+=moveDir*7;
+        if(car.x<60) car.x=60;
+        if(car.x+car.w>440) car.x=440-car.w;
+
+        distance+=speed/10;
+        score=Math.floor(distance);
+        speed=3+distance/150;
+
+        if(Math.random()<0.025){
+            const lanes=[80,160,240,320,400];
+            enemies.push({x:lanes[Math.floor(Math.random()*5)], y:-100, w:40, h:80});
+        }
+
+        enemies.forEach(e=>e.y+=speed);
+        enemies=enemies.filter(e=>e.y<H+100);
+
+        enemies.forEach(e=>{
+            ctx.fillStyle="#999900";
+            ctx.fillRect(e.x,e.y,e.w,e.h);
+            // wheels
+            ctx.fillStyle="black";
+            ctx.fillRect(e.x-8,e.y+20,12,15);
+            ctx.fillRect(e.x+36,e.y+20,12,15);
+            ctx.fillRect(e.x-8,e.y+50,12,15);
+            ctx.fillRect(e.x+36,e.y+50,12,15);
+
+            if(hit(car,e)){
+                gameOver=true;
+                if(!videoPlaying){ videoPlaying=true; playGameOverVideo(); }
+            }
+        });
+
+        // player car
+        ctx.fillStyle="#00c896";
+        ctx.fillRect(car.x,car.y,car.w,car.h);
+        ctx.fillStyle="black";
+        ctx.fillRect(car.x-8,car.y+20,12,15);
+        ctx.fillRect(car.x+36,car.y+20,12,15);
+        ctx.fillRect(car.x-8,car.y+50,12,15);
+        ctx.fillRect(car.x+36,car.y+50,12,15);
+
+        ctx.fillStyle="yellow";
+        ctx.font="30px Courier";
+        ctx.fillText("SCORE: "+score,10,35);
+    }
+
+    tvEffect();
+    requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
