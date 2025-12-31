@@ -98,9 +98,7 @@
         AVOID CARS<br><br>
         <div id="tapBar">TAP TO PLAY</div>
     </div>
-    <audio id="menuMusic" loop>
-        <source src="bg.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="menuMusic"></audio>
     <video id="gameOverVideo" playsinline>
         <source src="prank.mp4" type="video/mp4">
     </video>
@@ -119,10 +117,37 @@
         const powerText = document.getElementById("powerText");
         const powerFill = document.getElementById("powerFill");
         const startBox = document.getElementById("startBox");
-        const menuMusic = document.getElementById("menuMusic");
-        const video = document.getElementById("gameOverVideo");
-        const hud = document.getElementById("hud");
+const menuMusic = document.getElementById("menuMusic");
+const video = document.getElementById("gameOverVideo");
+const hud = document.getElementById("hud");
 
+// 🎵 BACKGROUND MUSIC LIST
+const bgTracks = [
+    "bg1.mp3",
+    "bg2.mp3",
+    "bg3.mp3"
+];
+
+let lastTrack = null;
+
+// 🎵 PLAY RANDOM BACKGROUND MUSIC (NO REPEAT)
+function playRandomBG() {
+    let track;
+
+    do {
+        track = bgTracks[Math.floor(Math.random() * bgTracks.length)];
+    } while (track === lastTrack && bgTracks.length > 1);
+
+    lastTrack = track;
+
+    menuMusic.pause();
+    menuMusic.src = track;
+    menuMusic.loop = true;
+    menuMusic.currentTime = 0;
+    menuMusic.volume = 0.5;
+
+    menuMusic.play().catch(() => {});
+}
         // Game constants
         const W = 500, H = 700;
         const LANES = [80, 160, 240, 320, 400];
@@ -365,14 +390,11 @@
         startBox.onclick = () => {
     startBox.style.display = "none";
 
-    // AUDIO UNLOCK (required ng Chrome / Android / iOS)
-    menuMusic.volume = 0.5;
-    menuMusic.currentTime = 0;
-    menuMusic.play();
+    // 🎵 RANDOM BG MUSIC
+    playRandomBG();
 
     gameStarted = true;
 };
-
         // Touch controls for mobile
         canvas.addEventListener("touchstart", e => {
             moveDir = e.touches[0].clientX < W / 2 ? -1 : 1;
@@ -415,15 +437,14 @@ video.addEventListener("ended", () => {
     canvas.style.display = "block";
     hud.style.display = "block";
 
-    // 🔊 BALIK BACKGROUND MUSIC
-    menuMusic.loop = true;
-    menuMusic.currentTime = 0;
-    menuMusic.play();
+    videoPlaying = false; // ✅ FIX: RESUME GAME LOOP
+
+    // 🎵 NEW RANDOM MUSIC AFTER VIDEO
+    playRandomBG();
 
     initGame();
     gameStarted = true;
 });
-
         // Initialize game state
         initGame();
 
