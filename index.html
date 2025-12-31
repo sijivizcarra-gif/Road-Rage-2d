@@ -404,12 +404,17 @@
 
         // Handle video playback end
         video.addEventListener("ended", () => {
-            video.style.display = "none";
-            canvas.style.display = "block";
-            hud.style.display = "block";
-            initGame();
-            gameStarted = true;
-        });
+    video.style.display = "none";
+    canvas.style.display = "block";
+    hud.style.display = "block";
+
+    // 🔊 BALIK BACKGROUND MUSIC
+    menuMusic.currentTime = 0;
+    menuMusic.play();
+
+    initGame();
+    gameStarted = true;
+});
 
         // Initialize game state
         initGame();
@@ -525,8 +530,11 @@ if (powerState === null && powerCooldown > 0) {
                             powerTimer = Math.max(0, powerTimer - 10);
                         } else {
                             // No shield - game over
-                            gameOver = true;
-                            videoPlaying = true;
+gameOver = true;
+videoPlaying = true;
+
+// PAUSE BG MUSIC
+menuMusic.pause();
 
                             // Update high score if needed
                             if (score > highScore) {
@@ -569,4 +577,4 @@ if (powerState === null && powerCooldown > 0) {
         loop();
     </script>
 </body>
-        </html>
+</html>
