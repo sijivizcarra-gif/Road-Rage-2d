@@ -126,6 +126,8 @@ const bgTracks = [
     "bg1.mp3",
     "bg2.mp3",
     "bg3.mp3"
+    "bg4.mp3"
+    "bg5.mp3"
 ];
 
 let lastTrack = null;
@@ -142,12 +144,15 @@ function playRandomBG() {
 
     menuMusic.pause();
     menuMusic.src = track;
-    menuMusic.loop = true;
+    menuMusic.loop = false;
     menuMusic.currentTime = 0;
     menuMusic.volume = 0.5;
 
     menuMusic.play().catch(() => {});
 }
+        menuMusic.addEventListener("ended", () => {
+    playRandomBG();
+});
         // Game constants
         const W = 500, H = 700;
         const LANES = [80, 160, 240, 320, 400];
