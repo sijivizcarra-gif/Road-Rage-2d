@@ -156,7 +156,7 @@
             let powerState=null;
             let powerTimer=0;
             let scoreMultiplier=1;
-            let nextPowerScore=500;
+            let nextPowerScore=1000;
             let invincibleTimer = 0;
 
             highScore=localStorage.getItem("rr_high")||0;
@@ -176,12 +176,12 @@
                 powerState=null;
                 powerTimer=0;
                 scoreMultiplier=1;
-                nextPowerScore=500;
+                nextPowerScore=1000;
                 invincibleTimer = 0;
                 gameOver=false;
                 videoPlaying=false;
 
-                for(let i=0;i<H;i+=100)
+                for(let i=0;i<H;i+=200)
                     roadLines.push({x:W/2-5,y:i,w:10,h:40});
             }
 
