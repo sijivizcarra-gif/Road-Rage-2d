@@ -1,613 +1,591 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Road Rage 2D Beta</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            overflow: hidden;
-            touch-action: none;
-            font-family: Courier, monospace;
-        }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        canvas {
-            position: absolute;
-        }
-        #hud {
-            top: 43px;
-            position: absolute;
-            left: 10px;
-            z-index: 30;
-            color: yellow;
-        }
-        #scoreText {
-            font-size: 20px;
-        }
-        #bestText {
-            font-size: 16px;
-        }
-        #powerText {
-            font-size: 14px;
-            color: #00ffff;
-            margin-top: 6px;
-        }
-        #powerBar {
-            width: 120px;
-            height: 6px;
-            background: #333;
-            margin-top: 4px;
-        }
-        #powerFill {
-            height: 100%;
-            width: 0%;
-            background: #00ffff;
-        }
-        #startBox {
-            position: absolute;
-            width: 420px;
-            background: rgba(0, 0, 0, 0.75);
-            border: 2px solid yellow;
-            color: #eee;
-            padding: 20px;
-            text-align: center;
-            z-index: 40;
-        }
-        #tapBar {
-            background: yellow;
-            color: black;
-            padding: 15px;
-            font-size: 22px;
-            font-weight: bold;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        video {
-            position: absolute;
-            width: 600px;
-            height: 350px;
-            display: none;
-            z-index: 100;
-            background: black;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="game" width="500" height="700"></canvas>
-    <div id="hud">
-        <div id="scoreText">SCORE: 0</div>
-        <div id="bestText">BEST: 0</div>
-        <div id="powerText"></div>
-        <div id="powerBar"><div id="powerFill"></div></div>
-    </div>
-    <div id="startBox">
-        <h1 style="color: yellow">Road Rage 2D</h1>
-        TAP LEFT / RIGHT<br><br>
-        AVOID CARS<br><br>
-        <div id="tapBar">TAP TO PLAY</div>
-    </div>
-    <audio id="menuMusic"></audio>
-    <video id="gameOverVideo" playsinline>
-        <source src="prank.mp4" type="video/mp4">
-    </video>
+<!DOCTYPE html>  <html lang="en">    <head>    
+    <meta charset="UTF-8">    
+    <title>Road Rage 2D - Pro Edition</title>    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
+    <style>    
+        :root {    
+            --neon-yellow: #faff00;    
+            --neon-blue: #00f2ff;    
+            --neon-red: #ff3131;    
+            --bg-dark: #050505;    
+        }    
+        html, body {    
+            margin: 0; padding: 0; width: 100%; height: 100%;    
+            background: var(--bg-dark);    
+            overflow: hidden; touch-action: none;    
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;    
+        }    
+        body { display: flex; justify-content: center; align-items: center; }  canvas {    
+        border-left: 4px solid #222;    
+        border-right: 4px solid #222;    
+        box-shadow: 0 0 50px rgba(0,0,0,1);    
+        background: #111;    
+    }    /* Modern HUD */    
+#hud {    
+    position: absolute; top: 20px; left: 20px; z-index: 30;    
+    color: white; pointer-events: none;    
+}    
+.stat-box { margin-bottom: 10px; }    
+#scoreText { font-size: 32px; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 10px rgba(250,255,0,0.5); }    
+#bestText { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; }    
+    
+#powerContainer { margin-top: 15px; }    
+#powerBar {    
+    width: 150px; height: 6px; background: rgba(255,255,255,0.1);    
+    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);    
+}    
+#powerFill { height: 100%; width: 0%; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); transition: width 0.1s; }    
 
-    <script>
-        // Prevent default touch behavior for better control
-        document.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+#powerText {    
+    font-size: 14px; color: var(--neon-blue); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px;    
+}    
 
-        // Canvas and context references
-        const canvas = document.getElementById("game");
-        const ctx = canvas.getContext("2d");
-
-        // UI Elements
-        const scoreText = document.getElementById("scoreText");
-        const bestText = document.getElementById("bestText");
-        const powerText = document.getElementById("powerText");
-        const powerFill = document.getElementById("powerFill");
-        const startBox = document.getElementById("startBox");
-const menuMusic = document.getElementById("menuMusic");
-const video = document.getElementById("gameOverVideo");
-const hud = document.getElementById("hud");
-
-// 🎵 BACKGROUND MUSIC LIST
-const bgTracks = [
-    "bg4.mp3",
-    "bg5.mp3"
-];
-
-let lastTrack = null;
-
-// 🎵 PLAY RANDOM BACKGROUND MUSIC (NO REPEAT)
-function playRandomBG() {
-    let track;
-
-    do {
-        track = bgTracks[Math.floor(Math.random() * bgTracks.length)];
-    } while (track === lastTrack && bgTracks.length > 1);
-
-    lastTrack = track;
-
-    menuMusic.pause();
-    menuMusic.src = track;
-    menuMusic.loop = false;
-    menuMusic.currentTime = 0;
-    menuMusic.volume = 0.5;
-
-    menuMusic.play().catch(() => {});
+/* Professional Overlays */    
+.overlay {    
+    position: absolute; 
+    width: 350px;
+    /* Idagdag ang mga ito para sa alignment */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Ito ang sikreto sa pag-center */
+    
+    background: rgba(10, 10, 10, 0.85);    
+    backdrop-filter: blur(10px);    
+    border: 1px solid rgba(255,255,255,0.1);    
+    border-top: 5px solid var(--neon-yellow);    
+    color: white; 
+    padding: 40px; 
+    text-align: center; 
+    z-index: 100;    
+    border-radius: 4px; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);    
+    
+    /* Siguraduhing flex para pantay-pantay ang loob */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
-        menuMusic.addEventListener("ended", () => {
-    playRandomBG();
-});
-        // Game constants
-        const W = 500, H = 700;
-        const LANES = [80, 160, 240, 320, 400];
-        const COLORS = ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93"];
 
-        // Game state variables
-        let car, enemies, roadLines;
-        let speed, distance, score, highScore;
-        let moveDir = 0, spawnTimer = 0;
-        let gameStarted = false, gameOver = false, videoPlaying = false;
-        let keys = { left: false, right: false };
+h1 { font-size: 2.5rem; margin: 0 0 20px 0; letter-spacing: -1px; font-style: italic; }    
+p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }    
 
-        // Power-up system variables
-        let powerState = null;
-        let powerTimer = 0;
-        let scoreMultiplier = 1;
-        let nextPowerScore = 500;
-        let invincibleTimer = 0;
-        let powerCooldown = 0;
-        let powerMsg = "";
-        let powerMsgTimer = 0;
+.btn-pro {    
+    background: var(--neon-yellow); color: black; border: none;    
+    padding: 18px; font-size: 16px; font-weight: bold;    
+    text-transform: uppercase; letter-spacing: 2px; cursor: pointer;    
+    width: 100%; transition: 0.3s; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);    
+}    
+.btn-pro:hover { transform: scale(1.05); background: white; }    
 
-        // Initialize high score from localStorage
-        highScore = localStorage.getItem("rr_high") || 0;
-        bestText.textContent = "BEST: " + highScore;
+#gameOverBox { 
+    display: none; 
+    flex-direction: column; /* Para hindi magtabi-tabi ang text at button */
+    border-top-color: var(--neon-red); 
+}
+#gameOverBox { 
+    display: none; 
+    flex-direction: column;
+    border-top-color: var(--neon-red); 
+}
+    
 
-        /**
-         * Returns a random color from the COLORS array
-         * @returns {string} Random color hex code
-         */
-        function randColor() {
-            return COLORS[Math.floor(Math.random() * COLORS.length)];
-        }
+.blink { animation: blink-anim 1s infinite; }    
+@keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.final-score-label {
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #888;
+    margin-top: 20px;
+}
 
-        /**
-         * Initializes or resets the game to its starting state
-         */
-        function initGame() {
-            // Player car setup
-            car = {
-                x: 240, y: H - 120,
-                w: 40, h: 80,
-                color: randColor(),
-                shield: false
-            };
-            
-            // Reset game objects and variables
-            enemies = [];
-            roadLines = [];
-            speed = 2.5;
-            distance = 0;
-            score = 0;
-            spawnTimer = 0;
-            
-           // Reset power-up system
-            powerState = null;
-            powerTimer = 0;
-            scoreMultiplier = 1;
-            nextPowerScore = 500;
-            invincibleTimer = 0;
-            powerCooldown = 0;
-            gameOver = false;
-            videoPlaying = false;
+.final-score-val {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--neon-yellow);
+    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(250,255,0,0.3);
+}
 
-            // Create initial road lines
-            for (let i = 0; i < H; i += 100) {
-                roadLines.push({
-                    x: W / 2 - 5,
-                    y: i,
-                    w: 10,
-                    h: 40
-                });
-            }
-        }
+</style>  </head>    
+<body>  <div id="hud">    
+    <div class="stat-box">    
+        <div id="bestText">Top Record: 0</div>    
+        <div id="scoreText">0</div>    
+    </div>    
+    <div id="powerContainer">    
+        <div id="powerText"></div>    
+        <div id="powerBar"><div id="powerFill"></div></div>    
+    </div>    
+</div>    <canvas id="game" width="500" height="800"></canvas>
 
-        /**
-         * Checks collision between two rectangular objects
-         * @param {Object} a - First object with x, y, w, h properties
-         * @param {Object} b - Second object with x, y, w, h properties
-         * @returns {boolean} True if collision detected
-         */
-        function hit(a, b) {
-            return a.x < b.x + b.w &&
-                   a.x + a.w > b.x &&
-                   a.y < b.y + b.h &&
-                   a.y + a.h > b.y;
-        }
-
-        /**
-         * Draws the player's car with detailed styling
-         * @param {Object} c - Car object with position, size, and color properties
-         */
-        function drawPlayerCar(c) {
-            // Car body
-            ctx.fillStyle = c.color;
-            ctx.fillRect(c.x, c.y, c.w, c.h);
-
-            // Roof
-            ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
-            ctx.fillRect(c.x + 6, c.y + 10, c.w - 12, 22);
-
-            // Windshield
-            ctx.fillStyle = "#1c1c1c";
-            ctx.fillRect(c.x + 8, c.y + 14, c.w - 16, 14);
-
-            // Tires
-            ctx.fillStyle = "#F2070728";
-            ctx.fillRect(c.x - 6, c.y + 18, 6, 14);
-            ctx.fillRect(c.x + c.w, c.y + 18, 6, 14);
-            ctx.fillRect(c.x - 6, c.y + 48, 6, 14);
-            ctx.fillRect(c.x + c.w, c.y + 48, 6, 14);
-
-            // Shield visual effect
-            if (c.shield) {
-                ctx.strokeStyle = "#00ffff";
-                ctx.lineWidth = 3;
-                ctx.strokeRect(c.x - 4, c.y - 4, c.w + 8, c.h + 8);
-                ctx.lineWidth = 1;
-            }
-        }
-
-        /**
-         * Draws an enemy car with detailed styling
-         * @param {Object} e - Enemy car object with position, size, and color properties
-         */
-        function drawEnemyCar(e) {
-            // Car body
-            ctx.fillStyle = e.color;
-            ctx.fillRect(e.x, e.y, e.w, e.h);
-
-            // Hood
-            ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-            ctx.fillRect(e.x + 6, e.y + 12, e.w - 12, 22);
-
-            // Headlights
-            ctx.fillStyle = "#eee";
-            ctx.fillRect(e.x + 5, e.y + 6, 6, 6);
-            ctx.fillRect(e.x + e.w - 11, e.y + 6, 6, 6);
-
-            // Tires
-            ctx.fillStyle = "#F2070728";
-            ctx.fillRect(e.x - 6, e.y + 18, 6, 14);
-            ctx.fillRect(e.x + e.w, e.y + 18, 6, 14);
-            ctx.fillRect(e.x - 6, e.y + 48, 6, 14);
-            ctx.fillRect(e.x + e.w, e.y + 48, 6, 14);
-        }
-
-        /**
-         * Draws visual effects for active power-ups
-         */
-        function drawPowerEffects() {
-            if (!powerState) return;
-
-            // Shield power effect
-            if (powerState === "SHIELD") {
-                ctx.save();
-                ctx.strokeStyle = "rgba(0, 255, 255, 0.7)";
-                ctx.lineWidth = 4;
-                ctx.shadowColor = "#00ffff";
-                ctx.shadowBlur = 15;
-                ctx.strokeRect(car.x - 6, car.y - 6, car.w + 12, car.h + 12);
-                ctx.restore();
-            }
-
-            // Slow power effect
-            if (powerState === "SLOW") {
-                ctx.save();
-                ctx.strokeStyle = "rgba(100, 200, 255, 0.6)";
-                for (let i = 0; i < 3; i++) {
-                    ctx.strokeRect(
-                        car.x - 10 - i * 6,
-                        car.y - 10 - i * 6,
-                        car.w + 20 + i * 12,
-                        car.h + 20 + i * 12
-                    );
-                }
-                ctx.restore();
-            }
-
-            // 2X score multiplier effect
-            if (powerState === "2X") {
-                ctx.save();
-                ctx.fillStyle = "rgba(255, 215, 0, 0.15)";
-                ctx.shadowColor = "#ffd700";
-                ctx.shadowBlur = 20;
-                ctx.fillRect(car.x - 8, car.y - 8, car.w + 16, car.h + 16);
-                ctx.restore();
-            }
-        }
-
-        /**
-         * Spawns enemy cars in random lanes
-         */
-        function spawnEnemies() {
-            let lanes = [...LANES];
-            let count = Math.random() < 0.75 ? 1 : 2;
-            
-            for (let i = 0; i < count; i++) {
-                let idx = Math.floor(Math.random() * lanes.length);
-                enemies.push({
-                    x: lanes.splice(idx, 1)[0],
-                    y: -100,
-                    w: 40,
-                    h: 80,
-                    color: randColor()
-                });
-            }
-        }
-
-        /**
-         * Activates a random power-up and applies its effects
-         */
-        function activatePower() {
-            const powerUps = ["SHIELD", "SLOW", "2X"];
-            powerState = powerUps[Math.floor(Math.random() * 3)];
-            powerTimer = 300;
-            powerText.textContent = "POWER: " + powerState;
-
-            // Floating notification message
-            powerMsg = powerState + " POWER!";
-            powerMsgTimer = 60;
-
-            // Apply specific power-up effects
-            if (powerState === "SHIELD") {
-                car.shield = true;
-                powerCooldown = 900;
-            }
-
-            if (powerState === "SLOW") {
-                powerCooldown = 700;
-            }
-
-            if (powerState === "2X") {
-                scoreMultiplier = 2;
-                powerCooldown = 650;
-            }
-        }
-
-        // Start game when start box is clicked
-        startBox.onclick = () => {
-    startBox.style.display = "none";
-
-    // 🎵 RANDOM BG MUSIC
-    playRandomBG();
-
-    gameStarted = true;
-};
-        // Touch controls for mobile
-        canvas.addEventListener("touchstart", e => {
-            moveDir = e.touches[0].clientX < W / 2 ? -1 : 1;
-        }, { passive: false });
+<div id="startBox" class="overlay">    
+    <h1>ROAD<br><span style="color:var(--neon-yellow)">RAGE 2D</span></h1>    
+    <p>Master the highway. Avoid traffic. <br>Use power-ups to survive.</p>    
+    <button class="btn-pro" onclick="startGame()">Ignite Engine</button>    
+</div>    <div id="gameOverBox" class="overlay">    
+    <h1 style="color: var(--neon-red)">WASTED</h1>    
+    <div class="final-score-label">Distance Reached</div>    
+    <div id="finalScore" class="final-score-val">0</div>    
+    <button class="btn-pro blink" onclick="startGame()">Respawn</button>    
+</div>    <audio id="menuMusic"></audio>
+<script>    
+    const canvas = document.getElementById("game");    
+    const ctx = canvas.getContext("2d");    
+    const scoreText = document.getElementById("scoreText");    
+    const bestText = document.getElementById("bestText");    
+    const powerFill = document.getElementById("powerFill");    
+    const powerText = document.getElementById("powerText");    
+    const startBox = document.getElementById("startBox");    
+    const gameOverBox = document.getElementById("gameOverBox");    
+    const finalScore = document.getElementById("finalScore");    
+    const menuMusic = document.getElementById("menuMusic");    
+  
+    const W = 500, H = 800;    
+    const LANES = [85, 165, 245, 325, 405];    
+    const COLORS = ["#FF3131", "#00F2FF", "#FFCA3A", "#8AC926", "#6A4C93"];    
         
-        canvas.addEventListener("touchend", () => moveDir = 0, { passive: false });
-
-        // Keyboard controls for PC
-        document.addEventListener("keydown", e => {
-            if (e.key === "ArrowLeft" || e.key === "a") keys.left = true;
-            if (e.key === "ArrowRight" || e.key === "d") keys.right = true;
-        });
-
-        document.addEventListener("keyup", e => {
-            if (e.key === "ArrowLeft" || e.key === "a") keys.left = false;
-            if (e.key === "ArrowRight" || e.key === "d") keys.right = false;
-        });
-
-        // Mouse controls for PC
-        canvas.addEventListener("mousedown", e => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            moveDir = x < W / 2 ? -1 : 1;
-        });
-
-        canvas.addEventListener("mouseup", () => {
-            moveDir = 0;
-        });
-
-        // 🔴 STOP BACKGROUND MUSIC WHEN VIDEO STARTS
-video.addEventListener("play", () => {
-    menuMusic.pause();
-    menuMusic.currentTime = 0;
-    menuMusic.loop = false;
-});
-
-// Handle video playback end
-video.addEventListener("ended", () => {
-    video.style.display = "none";
-    canvas.style.display = "block";
-    hud.style.display = "block";
-
-    videoPlaying = false; // ✅ FIX: RESUME GAME LOOP
-
-    // 🎵 NEW RANDOM MUSIC AFTER VIDEO
-    playRandomBG();
-
-    initGame();
-    gameStarted = true;
-});
-        // Initialize game state
-        initGame();
-
-        /**
-         * Main game loop - handles rendering, updates, and game logic
-         */
-        function loop() {
-            // Skip game logic if video is playing
-            if (videoPlaying) {
-                requestAnimationFrame(loop);
-                return;
-            }
-
-            // Clear canvas and draw road background
-            ctx.clearRect(0, 0, W, H);
-            ctx.fillStyle = "#141414";
-            ctx.fillRect(50, 0, 400, H);
-
-            // Update and draw road lines
-            roadLines.forEach(line => {
-                line.y += speed;
-                if (line.y > H) line.y = -100;
-                ctx.fillStyle = "#bbb";
-                ctx.fillRect(line.x, line.y, line.w, line.h);
-            });
-
-            // Game logic when game is active and not over
-            if (gameStarted && !gameOver) {
-                // Update power cooldown
-                if (powerCooldown > 0) powerCooldown--;
-                if (invincibleTimer > 0) invincibleTimer--;
-
-                // Handle player movement (keyboard priority over touch/mouse)
-                let dir = 0;
-                if (keys.left) {
-                    dir = -1;
-                } else if (keys.right) {
-                    dir = 1;
-                } else {
-                    dir = moveDir;
-                }
-                
-                car.x += dir * 7;
-                car.x = Math.max(60, Math.min(car.x, 440 - car.w));
-
-                // Update distance and score
-                distance += speed / 12;
-                score = Math.floor(distance * scoreMultiplier);
-
-                // Calculate difficulty scaling
-                let level = Math.floor(score / 1000);
-                let baseSpeed = 2.5;
-                let levelSpeed = level * 0.6;
-                let smoothSpeed = distance / 600;
-                speed = Math.min(10, baseSpeed + levelSpeed + smoothSpeed);
-
-                // Update UI
-                scoreText.textContent = "SCORE: " + score;
-
-                // Check for power-up activation
-                if (
-    score >= nextPowerScore &&
-    powerCooldown === 0 &&
-    powerState === null
-) {
-    activatePower();
-    nextPowerScore += 400;
-}
-                // Handle active power-up timer and effects
-if (powerTimer > 0) {
-    powerTimer--;
-    powerFill.style.width = (powerTimer / 300 * 100) + "%";
-    
-    if (powerState === "SLOW") speed *= 0.6;
-    
-    if (powerTimer === 0) {
+    let car, enemies, roadLines, sideMarkers, speed, distance, score, highScore;    
+    let gameStarted = false, gameOver = false, moveDir = 0, spawnTimer = 0;    
+    let powerState = null, powerTimer = 0, powerCooldown = 0, nextPowerScore = 500;    
+    let scoreMultiplier = 1, powerMsg = "", powerMsgTimer = 0;    
+    let keys = { left: false, right: false };    
+    let baseDistance = 0; // Para sa tamang scoring ng 2X
+    let slowMultiplier = 1; // Para sa SLOW power
+    let originalSpeed = 4; // Store original speed for SLOW power
+  
+    const bgTracks = ["bg4.mp3", "bg5.mp3"];    
+    let lastTrack = null;    
+  
+    highScore = localStorage.getItem("rr_high_pro") || 0;    
+    bestText.textContent = "Top Record: " + highScore;    
+  
+    function playRandomBG() {    
+        let track;    
+        do { track = bgTracks[Math.floor(Math.random() * bgTracks.length)]; } while (track === lastTrack && bgTracks.length > 1);    
+        lastTrack = track;    
+        menuMusic.src = track;    
+        menuMusic.play().catch(() => {});    
+    }    
+  
+    menuMusic.addEventListener("ended", () => playRandomBG());    
+  
+    function initGame() {    
+        car = { 
+            x: 230, 
+            y: H - 150, 
+            w: 40, 
+            h: 75, 
+            color: varColor('--neon-yellow'), 
+            shield: false 
+        };    
+        enemies = []; 
+        roadLines = []; 
+        sideMarkers = [];    
+        speed = 4; 
+        distance = 0; 
+        score = 0; 
+        spawnTimer = 0;    
+        powerState = null; 
+        powerTimer = 0; 
+        powerCooldown = 0; 
+        nextPowerScore = 500;    
+        scoreMultiplier = 1; 
+        slowMultiplier = 1; 
+        originalSpeed = 4;
+        powerMsg = ""; 
+        powerMsgTimer = 0; 
+        gameOver = false;    
+        baseDistance = 0; // Reset base distance
+        
+        // RESET POWER UI ELEMENTS
         powerText.textContent = "";
         powerFill.style.width = "0%";
+        powerFill.style.background = varColor('--neon-blue');
+  
+        for (let i = 0; i < H; i += 80) {    
+            roadLines.push({ y: i });    
+            sideMarkers.push({ y: i });    
+        }    
+    }    
+  
+    function varColor(name) { 
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); 
+    }    
+    
+    function startGame() { 
+        startBox.style.display = "none"; 
+        gameOverBox.style.display = "none"; 
+        initGame(); 
+        gameStarted = true; 
+        playRandomBG(); 
+    }    
+  
+    function hit(a, b) {
+        return a.x < b.x + b.w && 
+               a.x + a.w > b.x && 
+               a.y < b.y + b.h && 
+               a.y + a.h > b.y;
+    }
+
+    function spawnEnemies() {
+        let lanes = [...LANES];
+        let count = Math.random() < 0.75 ? 1 : 2; // 75% chance 1 car, 25% chance 2 cars
+        
+        for (let i = 0; i < count; i++) {
+            if (lanes.length === 0) break;
+            let idx = Math.floor(Math.random() * lanes.length);
+            enemies.push({ 
+                x: lanes.splice(idx, 1)[0], 
+                y: -100, 
+                w: 40, 
+                h: 80, 
+                color: COLORS[Math.floor(Math.random() * COLORS.length)] 
+            });
+        }
+    }
+
+    function drawPlayer(c) {    
+        ctx.fillStyle = "rgba(0,0,0,0.4)"; 
+        ctx.fillRect(c.x + 5, c.y + 5, c.w, c.h);    
+        ctx.fillStyle = c.color; 
+        ctx.fillRect(c.x, c.y, c.w, c.h);    
+        ctx.fillStyle = "#111"; 
+        ctx.fillRect(c.x + 5, c.y + 15, c.w - 10, 15);    
+        ctx.fillStyle = "white"; 
+        ctx.shadowBlur = 10; 
+        ctx.shadowColor = "white";    
+        ctx.fillRect(c.x + 5, c.y, 8, 4); 
+        ctx.fillRect(c.x + c.w - 13, c.y, 8, 4);    
+        ctx.shadowBlur = 0;    
+    }    
+  
+    function drawEnemy(e) {    
+        ctx.fillStyle = e.color; 
+        ctx.fillRect(e.x, e.y, e.w, e.h);    
+        ctx.fillStyle = "rgba(0, 0, 0, 0.25)"; 
+        ctx.fillRect(e.x + 6, e.y + 12, e.w - 12, 22);    
+        ctx.fillStyle = "#eee"; 
+        ctx.fillRect(e.x + 5, e.y + 6, 6, 6); 
+        ctx.fillRect(e.x + e.w - 11, e.y + 6, 6, 6);    
+    }    
+  
+    function drawPowerEffects() {
+        if (!powerState) return;
+
+        // Shield power effect
+        if (powerState === "SHIELD") {
+            ctx.save();
+            ctx.strokeStyle = car.shield ? "rgba(0, 255, 255, 0.7)" : "rgba(255, 100, 100, 0.5)";
+            ctx.lineWidth = 4;
+            ctx.shadowColor = car.shield ? "#00ffff" : "#ff6464";
+            ctx.shadowBlur = car.shield ? 15 : 8;
+            ctx.strokeRect(car.x - 6, car.y - 6, car.w + 12, car.h + 12);
+            ctx.restore();
+        }
+
+        // Slow power effect
+        if (powerState === "SLOW") {
+            ctx.save();
+            ctx.strokeStyle = "rgba(100, 200, 255, 0.6)";
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeRect(
+                    car.x - 10 - i * 6,
+                    car.y - 10 - i * 6,
+                    car.w + 20 + i * 12,
+                    car.h + 20 + i * 12
+                );
+            }
+            ctx.restore();
+        }
+
+        // 2X score multiplier effect
+        if (powerState === "2X") {
+            ctx.save();
+            ctx.fillStyle = "rgba(255, 215, 0, 0.15)";
+            ctx.shadowColor = "#ffd700";
+            ctx.shadowBlur = 20;
+            ctx.fillRect(car.x - 8, car.y - 8, car.w + 16, car.h + 16);
+            ctx.restore();
+        }
+    }
+  
+    function activatePower() {
+        const powers = ["SHIELD", "SLOW", "2X"];    
+        powerState = powers[Math.floor(Math.random() * 3)];    
+        powerTimer = 300; // 5 seconds
+        powerCooldown = 900; // 15 seconds cooldown
+        powerText.textContent = "POWER: " + powerState;    
+        powerMsg = powerState + " POWER!"; 
+        powerMsgTimer = 60;    
         
         if (powerState === "SHIELD") {
-            car.shield = false;
+            car.shield = true;
         }
         
-        scoreMultiplier = 1;
-        powerState = null;
+        if (powerState === "SLOW") {
+            slowMultiplier = 0.6; // 40% slower
+            originalSpeed = speed; // Store current speed
+        }
+        
+        if (powerState === "2X") {
+            scoreMultiplier = 2;
+            baseDistance = distance; // Store current distance
+        }
     }
-}
-
-// SHOW COOLDOWN ON POWER BAR (WHEN NO ACTIVE POWER)
-if (powerState === null && powerCooldown > 0) {
-    powerFill.style.width = ((1 - powerCooldown / 900) * 100) + "%";
-}
-                // Spawn new enemies
-                spawnTimer++;
-                if (spawnTimer > Math.max(80, 140 - distance / 10)) {
-                    spawnEnemies();
-                    spawnTimer = 0;
-                }
-
-                // Update and draw enemies
-                enemies.forEach(enemy => enemy.y += speed);
-                enemies = enemies.filter(enemy => enemy.y < H + 120);
-
-                enemies.forEach(enemy => {
-                    drawEnemyCar(enemy);
-                    
-                    // Handle collision detection
-                    if (hit(car, enemy)) {
-                        if (powerState === "SHIELD") {
-                            // Shield active - deflect enemy and reduce power time
-                            enemy.y = H + 200;
-                            powerTimer = Math.max(0, powerTimer - 10);
-                        } else {
-                            // No shield - game over
-gameOver = true;
-videoPlaying = true;
-
-// PAUSE BG MUSIC (HARD STOP)
-menuMusic.pause();
-menuMusic.currentTime = 0;
-menuMusic.loop = false;
-
-                            // Update high score if needed
-                            if (score > highScore) {
-                                highScore = score;
-                                localStorage.setItem("rr_high", highScore);
-                            }
-
-                            // Show game over video
-                            hud.style.display = "none";
-                            canvas.style.display = "none";
-                            video.style.display = "block";
-                            video.currentTime = 0;
-                            video.play().catch(() => {});
-                        }
+        
+    function loop() {    
+        // Clear canvas
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = "#141414";
+        ctx.fillRect(50, 0, 400, H);
+  
+        // Update and draw road lines
+        roadLines.forEach(l => { 
+            l.y += speed; 
+            if (l.y > H) l.y = -80; 
+            ctx.fillStyle = "#bbb"; 
+            ctx.fillRect(W/2 - 5, l.y, 10, 40); 
+        });    
+        
+        // Update and draw side markers
+        sideMarkers.forEach(s => { 
+            s.y += speed; 
+            if (s.y > H) s.y = -80; 
+            ctx.fillStyle = "#444"; 
+            ctx.fillRect(50, s.y, 2, 40); 
+            ctx.fillRect(448, s.y, 2, 40); 
+        });    
+  
+        if (gameStarted && !gameOver) {    
+            // ========== POWER-UP SYSTEM ==========
+            // Active power timer
+            if (powerTimer > 0) {
+                powerTimer--;
+                powerFill.style.width = (powerTimer / 300 * 100) + "%";
+                powerFill.style.background = varColor('--neon-blue');
+                
+                if (powerTimer <= 0) {
+                    // Power expired
+                    if (powerState === "SHIELD") car.shield = false;
+                    if (powerState === "SLOW") {
+                        slowMultiplier = 1;
+                        // No need to restore speed here, it will be calculated normally
                     }
-                });
-
-                // Draw player and power effects
-                drawPlayerCar(car);
-                drawPowerEffects();
-
-                // Draw floating power-up message
-                if (powerMsgTimer > 0) {
-                    ctx.save();
-                    ctx.globalAlpha = powerMsgTimer / 60;
-                    ctx.fillStyle = "#00ffff";
-                    ctx.font = "bold 28px Courier";
-                    ctx.textAlign = "center";
-                    ctx.fillText(powerMsg, W / 2, H / 2 - 40);
-                    ctx.restore();
-                    powerMsgTimer--;
+                    if (powerState === "2X") {
+                        scoreMultiplier = 1;
+                        // IMPORTANT: Kapag natapos ang 2X, ang score ay dapat ang actual distance
+                        // Hindi dapat bumalik sa lower score
+                        // Ang distance ay hindi dapat baguhin
+                    }
+                    
+                    powerState = null;
+                    powerText.textContent = "";
+                    powerFill.style.width = "0%";
+                    powerFill.style.background = varColor('--neon-blue');
+                }
+            }
+            
+            // Cooldown timer (shows when next power available)
+            if (powerState === null && powerCooldown > 0) {
+                powerCooldown--;
+                powerFill.style.width = ((1 - powerCooldown / 900) * 100) + "%";
+                powerFill.style.background = "#666";
+                
+                if (powerCooldown <= 0) {
+                    powerFill.style.width = "0%";
+                    powerFill.style.background = varColor('--neon-blue');
                 }
             }
 
-            // Continue the game loop
-            requestAnimationFrame(loop);
-        }
+            // ========== CONTROLS ==========
+            let dir = 0;
+            if (keys.left) {
+                dir = -1;
+            } else if (keys.right) {
+                dir = 1;
+            } else {
+                dir = moveDir;
+            }
+            
+            car.x += dir * 7;
+            car.x = Math.max(60, Math.min(car.x, 440 - car.w));
+  
+            // ========== SCORING SYSTEM ==========
+            let distanceGained = speed / 12;
+            distance += distanceGained;
+            
+            // PERFECT 2X FIX: Only new distance is doubled
+            if (powerState === "2X") {
+                // Current distance minus base distance = new distance gained
+                let newDistance = distance - baseDistance;
+                // Score = base score + (new distance * 2)
+                score = Math.floor(baseDistance + (newDistance * 2));
+            } else {
+                score = Math.floor(distance);
+            }
+            
+            scoreText.textContent = score;    
+            
+            // ========== DIFFICULTY & SPEED ==========
+            // Calculate normal speed
+            let level = Math.floor(score / 1000);
+            let baseSpeed = 4;
+            let levelSpeed = level * 0.6;
+            let smoothSpeed = distance / 600;
+            let calculatedSpeed = Math.min(10, baseSpeed + levelSpeed + smoothSpeed);
+            
+            // Apply SLOW effect if active
+            if (powerState === "SLOW" && powerTimer > 0) {
+                speed = calculatedSpeed * slowMultiplier; // 60% speed
+            } else {
+                speed = calculatedSpeed;
+            }
 
-        // Start the game loop
-        loop();
-    </script>
-</body>
-</html>
+            // ========== POWER-UP SPAWNING ==========
+            if (score >= nextPowerScore && powerState === null && powerCooldown <= 0) { 
+                activatePower(); 
+                nextPowerScore = score + 400;
+            }    
+  
+            // ========== ENEMY SPAWNING ==========
+            spawnTimer++;
+            
+            if (spawnTimer > Math.max(80, 140 - distance / 10)) {
+                spawnEnemies(); 
+                spawnTimer = 0; 
+            }
+
+            // ========== ENEMY UPDATES ==========
+            enemies.forEach((e, i) => {  
+                e.y += speed; // Simple speed, not multiplied
+                drawEnemy(e);  
+                
+                // Check collision - FIXED SHIELD BUG
+                if (hit(car, e)) {    
+                    if (powerState === "SHIELD" && car.shield && powerTimer > 0) {
+                        // Shield active - deflect enemy and reduce power time
+                        e.y = H + 200;
+                        powerTimer = Math.max(0, powerTimer - 50); // -50 frames
+                        
+                        // After using shield once, disable it
+                        car.shield = false;
+                        powerText.textContent = "POWER: SHIELD (USED)";
+                    } else {    
+                        // Game over
+                        gameOver = true; 
+                        menuMusic.pause();
+                        menuMusic.currentTime = 0;
+                        
+                        // Update high score
+                        if (score > highScore) { 
+                            highScore = score; 
+                            localStorage.setItem("rr_high_pro", score); 
+                            bestText.textContent = "Top Record: " + score; 
+                        }    
+                        
+                        finalScore.textContent = score; 
+                        gameOverBox.style.display = "flex";    
+                    }    
+                }  
+            });  
+            
+            // Remove off-screen enemies
+            enemies = enemies.filter(e => e.y < H + 120);
+
+            // ========== DRAWING ==========
+            drawPlayer(car); 
+            drawPowerEffects();  
+  
+            // Show power-up message
+            if (powerMsgTimer > 0) {    
+                ctx.save(); 
+                ctx.globalAlpha = powerMsgTimer / 60; 
+                ctx.fillStyle = "#00ffff";
+                ctx.font = "bold 28px Courier";
+                ctx.textAlign = "center"; 
+                ctx.fillText(powerMsg, W / 2, H / 2 - 40); 
+                ctx.restore(); 
+                powerMsgTimer--;    
+            }
+            
+            // Show SLOW effect indicator
+            if (powerState === "SLOW" && powerTimer > 0) {
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = "#00aaff";
+                ctx.font = "bold 20px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("SLOW", W / 2, 40);
+                ctx.restore();
+            }
+            
+            // Show 2X effect indicator
+            if (powerState === "2X" && powerTimer > 0) {
+                ctx.save();
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = "#ffd700";
+                ctx.font = "bold 20px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("2X SCORE MULTIPLIER", W / 2, 40);
+                ctx.restore();
+            }
+            
+            // Show current speed
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = "#fff";
+            ctx.font = "12px sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText("Speed: " + speed.toFixed(1), 20, H - 20);
+            ctx.restore();
+        } else {
+            // Kapag hindi naglalaro (game over o nasa menu), i-reset ang power UI
+            powerText.textContent = "";
+            powerFill.style.width = "0%";
+            powerFill.style.background = varColor('--neon-blue');
+        }
+        
+        requestAnimationFrame(loop);    
+    }    
+  
+    // ========== INPUT CONTROLS ==========
+    window.addEventListener("keydown", e => { 
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = true; 
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = true; 
+    });    
+    
+    window.addEventListener("keyup", e => { 
+        if (e.key === "ArrowLeft" || e.key === "a") keys.left = false; 
+        if (e.key === "ArrowRight" || e.key === "d") keys.right = false; 
+    });    
+    
+    // Touch controls
+    canvas.addEventListener("touchstart", e => {
+        e.preventDefault();
+        moveDir = e.touches[0].clientX < W / 2 ? -1 : 1;
+    }, { passive: false });
+    
+    canvas.addEventListener("touchend", () => moveDir = 0, { passive: false });
+  
+    // Mouse controls
+    canvas.addEventListener("mousedown", e => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        moveDir = x < W / 2 ? -1 : 1;
+    });
+  
+    window.addEventListener("mouseup", () => moveDir = 0);
+  
+    // Prevent touch scrolling
+    document.addEventListener("touchmove", e => {
+        e.preventDefault();
+    }, { passive: false });
+  
+    // Initialize and start game
+    initGame(); 
+    loop();    
+</script>
+  </body>    
+</html>    
