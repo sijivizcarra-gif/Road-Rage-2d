@@ -178,6 +178,8 @@ window.addEventListener("mouseup", () => inputDir = 0);
 menuMusic.preload = "auto";
 menuMusic.volume = 0.5;
 menuMusic.setAttribute("playsinline", "");
+menuMusic.onplay = () => console.log("🎵 MUSIC PLAYING");
+menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
   
     const W = 500, H = 800;    
     const LANES = [85, 165, 245, 325, 405];    
@@ -190,7 +192,8 @@ menuMusic.setAttribute("playsinline", "");
     let baseDistance = 0; // Para sa tamang scoring ng 2X
     let slowMultiplier = 1; // Para sa SLOW power
     let originalSpeed = 4; // Store original speed for SLOW power
-  const bgTracks = [
+  
+    const bgTracks = [
   "https://drive.google.com/uc?export=download&id=1zc5TRLE_3y5zgcAVpRfKIvyzkqk9xtCe",
   "https://drive.google.com/uc?export=download&id=1XB1fG51IjzR2v2XXXfxCNeWaXw_y48cp",
   "https://drive.google.com/uc?export=download&id=1w9plxT2JMie7MJPdC2MMp7CNcnPVV4AN"
