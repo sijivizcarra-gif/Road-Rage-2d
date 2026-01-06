@@ -129,9 +129,42 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
     <div class="final-score-label">Distance Reached</div>    
     <div id="finalScore" class="final-score-val">0</div>    
     <button class="btn-pro blink" onclick="startGame()">Respawn</button>    
-</div>    <audio id="menuMusic"></audio>
+</div>    
+<audio id="menuMusic" preload="none" crossorigin="anonymous"></audio>
 <script>    
-    const canvas = document.getElementById("game");    
+    const canvas = document.getElementById("game");
+    let inputDir = 0; // -1 left, 1 right, 0 idle
+
+// ===== KEYBOARD =====
+window.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft" || e.key === "a") inputDir = -1;
+    if (e.key === "ArrowRight" || e.key === "d") inputDir = 1;
+});
+
+window.addEventListener("keyup", e => {
+    if (
+        e.key === "ArrowLeft" || e.key === "a" ||
+        e.key === "ArrowRight" || e.key === "d"
+    ) inputDir = 0;
+});
+
+// ===== TOUCH =====
+canvas.addEventListener("touchstart", e => {
+    e.preventDefault();
+    const x = e.touches[0].clientX;
+    inputDir = x < window.innerWidth / 2 ? -1 : 1;
+}, { passive: false });
+
+canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
+
+// ===== MOUSE =====
+canvas.addEventListener("mousedown", e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    inputDir = x < canvas.width / 2 ? -1 : 1;
+});
+
+window.addEventListener("mouseup", () => inputDir = 0);    
     const ctx = canvas.getContext("2d");    
     const scoreText = document.getElementById("scoreText");    
     const bestText = document.getElementById("bestText");    
@@ -140,7 +173,11 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
     const startBox = document.getElementById("startBox");    
     const gameOverBox = document.getElementById("gameOverBox");    
     const finalScore = document.getElementById("finalScore");    
-    const menuMusic = document.getElementById("menuMusic");    
+    const menuMusic = document.getElementById("menuMusic");
+
+menuMusic.preload = "auto";
+menuMusic.volume = 0.5;
+menuMusic.setAttribute("playsinline", "");
   
     const W = 500, H = 800;    
     const LANES = [85, 165, 245, 325, 405];    
@@ -149,13 +186,16 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
     let car, enemies, roadLines, sideMarkers, speed, distance, score, highScore;    
     let gameStarted = false, gameOver = false, moveDir = 0, spawnTimer = 0;    
     let powerState = null, powerTimer = 0, powerCooldown = 0, nextPowerScore = 500;    
-    let scoreMultiplier = 1, powerMsg = "", powerMsgTimer = 0;    
-    let keys = { left: false, right: false };    
+    let scoreMultiplier = 1, powerMsg = "", powerMsgTimer = 0;      
     let baseDistance = 0; // Para sa tamang scoring ng 2X
     let slowMultiplier = 1; // Para sa SLOW power
     let originalSpeed = 4; // Store original speed for SLOW power
   
-    const bgTracks = ["bg4.mp3", "bg5.mp3"];    
+    const bgTracks = [
+  "https://drive.google.com/file/d/1zc5TRLE_3y5zgcAVpRfKIvyzkqk9xtCe/view?usp=drivesdk",
+  "https://drive.google.com/file/d/1XB1fG51IjzR2v2XXXfxCNeWaXw_y48cp/view?usp=drivesdk",
+  "https://drive.google.com/file/d/1w9plxT2JMie7MJPdC2MMp7CNcnPVV4AN/view?usp=drivesdk"
+]; 
     let lastTrack = null;    
   
     highScore = localStorage.getItem("rr_high_pro") || 0;    
@@ -214,14 +254,16 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); 
     }    
     
-    function startGame() { 
-        startBox.style.display = "none"; 
-        gameOverBox.style.display = "none"; 
-        initGame(); 
-        gameStarted = true; 
-        playRandomBG(); 
-    }    
-  
+ function startGame() {
+    startBox.style.display = "none";
+    gameOverBox.style.display = "none";
+    initGame();
+    gameStarted = true;
+
+    menuMusic.volume = 0.5; // optional
+    menuMusic.load();
+    playRandomBG();
+}
     function hit(a, b) {
         return a.x < b.x + b.w && 
                a.x + a.w > b.x && 
@@ -398,17 +440,7 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
                     powerFill.style.background = varColor('--neon-blue');
                 }
             }
-
-            // ========== CONTROLS ==========
-            let dir = 0;
-            if (keys.left) {
-                dir = -1;
-            } else if (keys.right) {
-                dir = 1;
-            } else {
-                dir = moveDir;
-            }
-            
+let dir = inputDir;    
             car.x += dir * 7;
             car.x = Math.max(60, Math.min(car.x, 440 - car.w));
   
@@ -549,35 +581,6 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
         
         requestAnimationFrame(loop);    
     }    
-  
-    // ========== INPUT CONTROLS ==========
-    window.addEventListener("keydown", e => { 
-        if (e.key === "ArrowLeft" || e.key === "a") keys.left = true; 
-        if (e.key === "ArrowRight" || e.key === "d") keys.right = true; 
-    });    
-    
-    window.addEventListener("keyup", e => { 
-        if (e.key === "ArrowLeft" || e.key === "a") keys.left = false; 
-        if (e.key === "ArrowRight" || e.key === "d") keys.right = false; 
-    });    
-    
-    // Touch controls
-    canvas.addEventListener("touchstart", e => {
-        e.preventDefault();
-        moveDir = e.touches[0].clientX < W / 2 ? -1 : 1;
-    }, { passive: false });
-    
-    canvas.addEventListener("touchend", () => moveDir = 0, { passive: false });
-  
-    // Mouse controls
-    canvas.addEventListener("mousedown", e => {
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        moveDir = x < W / 2 ? -1 : 1;
-    });
-  
-    window.addEventListener("mouseup", () => moveDir = 0);
-  
     // Prevent touch scrolling
     document.addEventListener("touchmove", e => {
         e.preventDefault();
