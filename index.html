@@ -80,11 +80,6 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
 
 #gameOverBox { 
     display: none; 
-    flex-direction: column; /* Para hindi magtabi-tabi ang text at button */
-    border-top-color: var(--neon-red); 
-}
-#gameOverBox { 
-    display: none; 
     flex-direction: column;
     border-top-color: var(--neon-red); 
 }
@@ -165,7 +160,8 @@ canvas.addEventListener("mousedown", e => {
 });
 
 window.addEventListener("mouseup", () => inputDir = 0);    
-    const ctx = canvas.getContext("2d");    
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;    
     const scoreText = document.getElementById("scoreText");    
     const bestText = document.getElementById("bestText");    
     const powerFill = document.getElementById("powerFill");    
@@ -174,6 +170,25 @@ window.addEventListener("mouseup", () => inputDir = 0);
     const gameOverBox = document.getElementById("gameOverBox");    
     const finalScore = document.getElementById("finalScore");    
     const menuMusic = document.getElementById("menuMusic");
+    // ===== LOAD CAR IMAGES =====
+
+const playerImg = new Image();
+playerImg.src = "image/image2";
+
+const enemyImgs = [
+    "image/image1.png",
+    "image/image3.png",
+    "image/image4.png",
+      "image/image5.png",
+    "image/image6.png",
+    "image/image7.png",
+    "image/image8.png",
+    "image/image9.png"
+].map(src => {
+    const img = new Image();
+    img.src = src;
+    return img;
+});
 
 menuMusic.preload = "auto";
 menuMusic.volume = 0.5;
@@ -215,30 +230,28 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
   "musics/bg19.mp3",
   "musics/bg20.mp3"
 ];
-    let lastTrack = null;    
-  
-    highScore = localStorage.getItem("rr_high_pro") || 0;    
-    bestText.textContent = "Top Record: " + highScore;    
-  
-    function playRandomBG() {    
-        let track;    
-        do { track = bgTracks[Math.floor(Math.random() * bgTracks.length)]; } while (track === lastTrack && bgTracks.length > 1);    
-        lastTrack = track;    
-        menuMusic.src = track;    
-        menuMusic.play().catch(() => {});    
-    }    
-  
-    menuMusic.addEventListener("ended", () => playRandomBG());    
-  
+   let lastTrack = null;
+
+function playRandomBG() {
+    let track;
+    do {
+        track = bgTracks[Math.floor(Math.random() * bgTracks.length)];
+    } while (track === lastTrack && bgTracks.length > 1);
+
+    lastTrack = track;
+    menuMusic.src = track;
+    menuMusic.play().catch(() => {});
+}
+    
     function initGame() {    
         car = { 
-            x: 230, 
-            y: H - 150, 
-            w: 40, 
-            h: 75, 
-            color: varColor('--neon-yellow'), 
-            shield: false 
-        };    
+    x: 230,
+    y: H - 150,
+    w: 50,
+    h: 90,
+    img: playerImg,
+    shield: false
+};
         enemies = []; 
         roadLines = []; 
         sideMarkers = [];    
@@ -297,41 +310,43 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
         for (let i = 0; i < count; i++) {
             if (lanes.length === 0) break;
             let idx = Math.floor(Math.random() * lanes.length);
-            enemies.push({ 
-                x: lanes.splice(idx, 1)[0], 
-                y: -100, 
-                w: 40, 
-                h: 80, 
-                color: COLORS[Math.floor(Math.random() * COLORS.length)] 
-            });
+           enemies.push({ 
+    x: lanes.splice(idx, 1)[0],
+    y: -120,
+    w: 50,
+    h: 90,
+    img: enemyImgs[Math.floor(Math.random() * enemyImgs.length)]
+});
         }
     }
 
-    function drawPlayer(c) {    
-        ctx.fillStyle = "rgba(0,0,0,0.4)"; 
-        ctx.fillRect(c.x + 5, c.y + 5, c.w, c.h);    
-        ctx.fillStyle = c.color; 
-        ctx.fillRect(c.x, c.y, c.w, c.h);    
-        ctx.fillStyle = "#111"; 
-        ctx.fillRect(c.x + 5, c.y + 15, c.w - 10, 15);    
-        ctx.fillStyle = "white"; 
-        ctx.shadowBlur = 10; 
-        ctx.shadowColor = "white";    
-        ctx.fillRect(c.x + 5, c.y, 8, 4); 
-        ctx.fillRect(c.x + c.w - 13, c.y, 8, 4);    
-        ctx.shadowBlur = 0;    
-    }    
-  
-    function drawEnemy(e) {    
-        ctx.fillStyle = e.color; 
-        ctx.fillRect(e.x, e.y, e.w, e.h);    
-        ctx.fillStyle = "rgba(0, 0, 0, 0.25)"; 
-        ctx.fillRect(e.x + 6, e.y + 12, e.w - 12, 22);    
-        ctx.fillStyle = "#eee"; 
-        ctx.fillRect(e.x + 5, e.y + 6, 6, 6); 
-        ctx.fillRect(e.x + e.w - 11, e.y + 6, 6, 6);    
-    }    
-  
+   function drawPlayer(c) {
+    ctx.save();
+
+    // soft glow
+    ctx.shadowColor = "rgba(255,255,255,0.35)";
+    ctx.shadowBlur = 18;
+
+    if (c.img.complete) {
+        ctx.drawImage(c.img, c.x, c.y, c.w, c.h);
+    }
+
+    ctx.restore();
+}
+
+
+function drawEnemy(e) {
+    ctx.save();
+
+    ctx.shadowColor = "rgba(255,255,255,0.25)";
+    ctx.shadowBlur = 14;
+
+    if (e.img.complete) {
+        ctx.drawImage(e.img, e.x, e.y, e.w, e.h);
+    }
+
+    ctx.restore();
+}
     function drawPowerEffects() {
         if (!powerState) return;
 
@@ -418,6 +433,9 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
             ctx.fillRect(50, s.y, 2, 40); 
             ctx.fillRect(448, s.y, 2, 40); 
         });    
+        // subtle road light wash (HD effect)
+ctx.fillStyle = "rgba(255,255,255,0.08)";
+ctx.fillRect(50, 0, 400, H);
   
         if (gameStarted && !gameOver) {    
             // ========== POWER-UP SYSTEM ==========
@@ -436,9 +454,6 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
                     }
                     if (powerState === "2X") {
                         scoreMultiplier = 1;
-                        // IMPORTANT: Kapag natapos ang 2X, ang score ay dapat ang actual distance
-                        // Hindi dapat bumalik sa lower score
-                        // Ang distance ay hindi dapat baguhin
                     }
                     
                     powerState = null;
