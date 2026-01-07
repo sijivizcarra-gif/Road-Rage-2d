@@ -170,10 +170,14 @@ window.addEventListener("mouseup", () => inputDir = 0);
     const gameOverBox = document.getElementById("gameOverBox");    
     const finalScore = document.getElementById("finalScore");    
     const menuMusic = document.getElementById("menuMusic");
+    
+    let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
+bestText.textContent = "Top Record: " + highScore;
+
     // ===== LOAD CAR IMAGES =====
 
 const playerImg = new Image();
-playerImg.src = "image/image2";
+playerImg.src = "image/image2.png";
 
 const enemyImgs = [
     "image/image1.png",
@@ -200,7 +204,7 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
     const LANES = [85, 165, 245, 325, 405];    
     const COLORS = ["#FF3131", "#00F2FF", "#FFCA3A", "#8AC926", "#6A4C93"];    
         
-    let car, enemies, roadLines, sideMarkers, speed, distance, score, highScore;    
+      let car, enemies, roadLines, sideMarkers, speed, distance, score;
     let gameStarted = false, gameOver = false, moveDir = 0, spawnTimer = 0;    
     let powerState = null, powerTimer = 0, powerCooldown = 0, nextPowerScore = 500;    
     let scoreMultiplier = 1, powerMsg = "", powerMsgTimer = 0;      
@@ -545,7 +549,8 @@ let dir = inputDir;
                         menuMusic.currentTime = 0;
                         
                         // Update high score
-                        if (score > highScore) { 
+                        
+            if (score > highScore) { 
                             highScore = score; 
                             localStorage.setItem("rr_high_pro", score); 
                             bestText.textContent = "Top Record: " + score; 
@@ -556,7 +561,6 @@ let dir = inputDir;
                     }    
                 }  
             });  
-            
             // Remove off-screen enemies
             enemies = enemies.filter(e => e.y < H + 120);
 
