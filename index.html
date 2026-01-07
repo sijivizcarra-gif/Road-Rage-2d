@@ -125,7 +125,7 @@ p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }
     <div id="finalScore" class="final-score-val">0</div>    
     <button class="btn-pro blink" onclick="startGame()">Respawn</button>    
 </div>    
-<audio id="menuMusic" preload="auto"></audio>
+
 <script>    
     const canvas = document.getElementById("game");
     let inputDir = 0; // -1 left, 1 right, 0 idle
@@ -169,7 +169,7 @@ window.addEventListener("mouseup", () => inputDir = 0);
     const startBox = document.getElementById("startBox");    
     const gameOverBox = document.getElementById("gameOverBox");    
     const finalScore = document.getElementById("finalScore");    
-    const menuMusic = document.getElementById("menuMusic");
+    
     
     let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
 bestText.textContent = "Top Record: " + highScore;
@@ -194,12 +194,7 @@ const enemyImgs = [
     return img;
 });
 
-menuMusic.preload = "auto";
-menuMusic.volume = 0.5;
-menuMusic.setAttribute("playsinline", "");
-menuMusic.onplay = () => console.log("🎵 MUSIC PLAYING");
-menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
-  
+
     const W = 500, H = 800;    
     const LANES = [85, 165, 245, 325, 405];    
     const COLORS = ["#FF3131", "#00F2FF", "#FFCA3A", "#8AC926", "#6A4C93"];    
@@ -234,18 +229,38 @@ menuMusic.onerror = e => console.log("❌ AUDIO ERROR", e);
   "musics/bg19.mp3",
   "musics/bg20.mp3"
 ];
-   let lastTrack = null;
+
+const bgAudios = bgTracks.map(src => {
+    const a = new Audio(src);
+    a.preload = "auto";
+    a.volume = 0.5;
+    a.setAttribute("playsinline", "");
+    return a;
+});
+
+let currentBG = null;
+let lastIndex = -1;
 
 function playRandomBG() {
-    let track;
+    let index;
     do {
-        track = bgTracks[Math.floor(Math.random() * bgTracks.length)];
-    } while (track === lastTrack && bgTracks.length > 1);
+        index = Math.floor(Math.random() * bgAudios.length);
+    } while (index === lastIndex && bgAudios.length > 1);
 
-    lastTrack = track;
-    menuMusic.src = track;
-    menuMusic.play().catch(() => {});
+    lastIndex = index;
+
+    if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+    }
+
+    currentBG = bgAudios[index];
+    currentBG.play().catch(()=>{});
+
+    // auto-next kapag natapos
+    currentBG.onended = playRandomBG;
 }
+   
     
     function initGame() {    
         car = { 
@@ -296,10 +311,9 @@ function playRandomBG() {
     initGame();
     gameStarted = true;
 
-    menuMusic.volume = 0.5; // optional
-    menuMusic.load();
-    playRandomBG();
+    playRandomBG(); // instant play
 }
+   
     function hit(a, b) {
         return a.x < b.x + b.w && 
                a.x + a.w > b.x && 
@@ -544,9 +558,9 @@ let dir = inputDir;
                         powerText.textContent = "POWER: SHIELD (USED)";
                     } else {    
                         // Game over
-                        gameOver = true; 
-                        menuMusic.pause();
-                        menuMusic.currentTime = 0;
+                        gameOver = true;
+stopMusic();
+                        
                         
                         // Update high score
                         
@@ -626,7 +640,20 @@ let dir = inputDir;
   
     // Initialize and start game
     initGame(); 
-    loop();    
+    loop();
+    function stopMusic() {
+    if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+    }
+}
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopMusic();
+});
+
+window.addEventListener("pagehide", stopMusic);
+window.addEventListener("beforeunload", stopMusic);   
 </script>
   </body>    
 </html>    
