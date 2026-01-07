@@ -1,8 +1,11 @@
-<!DOCTYPE html>  <html lang="en">    <head>    
-    <meta charset="UTF-8">    
-    <title>Road Rage Beta Test</title>    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
-    <style>    
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Road Rage 2D - Pro Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    
         :root {    
             --neon-yellow: #faff00;    
             --neon-blue: #00f2ff;    
@@ -21,27 +24,27 @@
         box-shadow: 0 0 50px rgba(0,0,0,1);    
         background: #111;    
     }    /* Modern HUD */    
-#hud {    
+  #hud {    
     position: absolute; top: 20px; left: 20px; z-index: 30;    
     color: white; pointer-events: none;    
-}    
-.stat-box { margin-bottom: 10px; }    
-#scoreText { font-size: 32px; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 10px rgba(250,255,0,0.5); }    
-#bestText { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; }    
+  }    
+  .stat-box { margin-bottom: 10px; }    
+  #scoreText { font-size: 32px; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 10px rgba(250,255,0,0.5); }    
+  #bestText { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; }    
     
-#powerContainer { margin-top: 15px; }    
-#powerBar {    
+  #powerContainer { margin-top: 15px; }    
+  #powerBar {    
     width: 150px; height: 6px; background: rgba(255,255,255,0.1);    
     border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);    
-}    
-#powerFill { height: 100%; width: 0%; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); transition: width 0.1s; }    
+  }    
+  #powerFill { height: 100%; width: 0%; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); transition: width 0.1s; }    
 
-#powerText {    
+  #powerText {    
     font-size: 14px; color: var(--neon-blue); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px;    
-}    
+  }    
 
-/* Professional Overlays */    
-.overlay {    
+  /* Professional Overlays */    
+  .overlay {    
     position: absolute; 
     width: 350px;
     /* Idagdag ang mga ito para sa alignment */
@@ -65,101 +68,148 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
+  }
 
-h1 { font-size: 2.5rem; margin: 0 0 20px 0; letter-spacing: -1px; font-style: italic; }    
-p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }    
+  h1 { font-size: 2.5rem; margin: 0 0 20px 0; letter-spacing: -1px; font-style: italic; }    
+  p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }    
 
-.btn-pro {    
+  .btn-pro {    
     background: var(--neon-yellow); color: black; border: none;    
     padding: 18px; font-size: 16px; font-weight: bold;    
     text-transform: uppercase; letter-spacing: 2px; cursor: pointer;    
     width: 100%; transition: 0.3s; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);    
-}    
-.btn-pro:hover { transform: scale(1.05); background: white; }    
+  }    
+  .btn-pro:hover { transform: scale(1.05); background: white; }    
 
-#gameOverBox { 
+  #gameOverBox { 
     display: none; 
     flex-direction: column;
     border-top-color: var(--neon-red); 
-}
+  }
     
 
-.blink { animation: blink-anim 1s infinite; }    
-@keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-.final-score-label {
+  .blink { animation: blink-anim 1s infinite; }    
+  @keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .final-score-label {
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 2px;
     color: #888;
     margin-top: 20px;
-}
+  }
 
-.final-score-val {
+  .final-score-val {
     font-size: 48px;
     font-weight: 900;
     color: var(--neon-yellow);
     margin-bottom: 30px;
     text-shadow: 0 0 20px rgba(250,255,0,0.3);
-}
+  }
 
-</style>  </head>    
-<body>  <div id="hud">    
-    <div class="stat-box">    
-        <div id="bestText">Top Record: 0</div>    
-        <div id="scoreText">0</div>    
-    </div>    
-    <div id="powerContainer">    
-        <div id="powerText"></div>    
-        <div id="powerBar"><div id="powerFill"></div></div>    
-    </div>    
-</div>    <canvas id="game" width="500" height="800"></canvas>
-
-<div id="startBox" class="overlay">    
-    <h1>ROAD<br><span style="color:var(--neon-yellow)">RAGE 2D</span></h1>    
-    <p>Master the highway. Avoid traffic. <br>Use power-ups to survive.</p>    
-    <button class="btn-pro" onclick="startGame()">Ignite Engine</button>    
-</div>    <div id="gameOverBox" class="overlay">    
-    <h1 style="color: var(--neon-red)">WASTED</h1>    
-    <div class="final-score-label">Distance Reached</div>    
-    <div id="finalScore" class="final-score-val">0</div>    
-    <button class="btn-pro blink" onclick="startGame()">Respawn</button>    
-</div>    
-
-<script>    
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div class="stat-box">
+      <div id="bestText">
+        Top Record: 0
+      </div>
+      <div id="scoreText">
+        0
+      </div>
+    </div>
+    <div id="powerContainer">
+      <div id="powerText"></div>
+      <div id="powerBar">
+        <div id="powerFill"></div>
+      </div>
+    </div>
+  </div>
+  <canvas id="game" width="500" height="800"></canvas>
+  <div id="startBox" class="overlay">
+    <h1>ROAD<br>
+    <span style="color:var(--neon-yellow)">RAGE 2D</span></h1>
+    <p>Master the highway. Avoid traffic.<br>
+    Use power-ups to survive.</p><button class="btn-pro" onclick="startGame()">Ignite Engine</button>
+  </div>
+  <div id="gameOverBox" class="overlay">
+    <h1 style="color: var(--neon-red)">WASTED</h1>
+    <div class="final-score-label">
+      Distance Reached
+    </div>
+    <div id="finalScore" class="final-score-val">
+      0
+    </div><button class="btn-pro blink" onclick="startGame()">Respawn</button>
+  </div>
+  <script>
+    
     const canvas = document.getElementById("game");
+    function preloadImages(srcArray, callback) {
+    let loaded = 0;
+    const images = [];
+    srcArray.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            loaded++;
+            if (loaded === srcArray.length) callback(images);
+        };
+        images.push(img);
+    });
+}
+const imageSources = [
+    "/Road-Rage-2d/image/image2.png", // player
+    "/Road-Rage-2d/image/image1.png",
+    "/Road-Rage-2d/image/image3.png",
+    "/Road-Rage-2d/image/image4.png",
+    "/Road-Rage-2d/image/image5.png",
+    "/Road-Rage-2d/image/image6.png",
+    "/Road-Rage-2d/image/image7.png",
+    "/Road-Rage-2d/image/image8.png",
+    "/Road-Rage-2d/image/image9.png"
+];
+let playerImg, enemyImgs;
+
+preloadImages(imageSources, (loadedImages) => {
+    playerImg = loadedImages[0];           // first image = player
+    enemyImgs = loadedImages.slice(1);     // rest = enemies
+
+    // Now safe to start the game
+    initGame(); 
+    loop();  // start the render loop
+});
     let inputDir = 0; // -1 left, 1 right, 0 idle
 
-// ===== KEYBOARD =====
-window.addEventListener("keydown", e => {
+  // ===== KEYBOARD =====
+  window.addEventListener("keydown", e => {
     if (e.key === "ArrowLeft" || e.key === "a") inputDir = -1;
     if (e.key === "ArrowRight" || e.key === "d") inputDir = 1;
-});
+  });
 
-window.addEventListener("keyup", e => {
+  window.addEventListener("keyup", e => {
     if (
         e.key === "ArrowLeft" || e.key === "a" ||
         e.key === "ArrowRight" || e.key === "d"
     ) inputDir = 0;
-});
+  });
 
-// ===== TOUCH =====
-canvas.addEventListener("touchstart", e => {
+  // ===== TOUCH =====
+  canvas.addEventListener("touchstart", e => {
     e.preventDefault();
     const x = e.touches[0].clientX;
     inputDir = x < window.innerWidth / 2 ? -1 : 1;
-}, { passive: false });
+  }, { passive: false });
 
-canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
+  canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
 
-// ===== MOUSE =====
-canvas.addEventListener("mousedown", e => {
+  // ===== MOUSE =====
+  canvas.addEventListener("mousedown", e => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     inputDir = x < canvas.width / 2 ? -1 : 1;
-});
+  });
 
-window.addEventListener("mouseup", () => inputDir = 0);    
+  window.addEventListener("mouseup", () => inputDir = 0);    
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = true;    
     const scoreText = document.getElementById("scoreText");    
@@ -172,29 +222,11 @@ window.addEventListener("mouseup", () => inputDir = 0);
     
     
     let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
-bestText.textContent = "Top Record: " + highScore;
+  bestText.textContent = "Top Record: " + highScore;
 
     // ===== LOAD CAR IMAGES =====
 
-// Player car image
-const playerImg = new Image();
-playerImg.src = "/Road-Rage-2d/image/image2.png";
 
-// Enemy car images
-const enemyImgs = [
-    "/Road-Rage-2d/image/image1.png",
-    "/Road-Rage-2d/image/image3.png",
-    "/Road-Rage-2d/image/image4.png",
-    "/Road-Rage-2d/image/image5.png",
-    "/Road-Rage-2d/image/image6.png",
-    "/Road-Rage-2d/image/image7.png",
-    "/Road-Rage-2d/image/image8.png",
-    "/Road-Rage-2d/image/image9.png"
-].map(src => {
-    const img = new Image();
-    img.src = src;
-    return img;
-});
 
 
     const W = 500, H = 800;    
@@ -208,7 +240,7 @@ const enemyImgs = [
     let baseDistance = 0; // Para sa tamang scoring ng 2X
     let slowMultiplier = 1; // Para sa SLOW power
     let originalSpeed = 4; // Store original speed for SLOW power
-  
+
     const bgTracks = [
   "/Road-Rage-2d/musics/bg1.mp3",
   "/Road-Rage-2d/musics/bg2.mp3",
@@ -230,20 +262,20 @@ const enemyImgs = [
   "/Road-Rage-2d/musics/bg18.mp3",
   "/Road-Rage-2d/musics/bg19.mp3",
   "/Road-Rage-2d/musics/bg20.mp3"
-];
+  ];
 
-const bgAudios = bgTracks.map(src => {
+  const bgAudios = bgTracks.map(src => {
     const a = new Audio(src);
     a.preload = "auto";
     a.volume = 0.5;
     a.setAttribute("playsinline", "");
     return a;
-});
+  });
 
-let currentBG = null;
-let lastIndex = -1;
+  let currentBG = null;
+  let lastIndex = -1;
 
-function playRandomBG() {
+  function playRandomBG() {
     let index;
     do {
         index = Math.floor(Math.random() * bgAudios.length);
@@ -261,7 +293,7 @@ function playRandomBG() {
 
     // auto-next kapag natapos
     currentBG.onended = playRandomBG;
-}
+  }
    
     
     function initGame() {    
@@ -272,7 +304,7 @@ function playRandomBG() {
     h: 90,
     img: playerImg,
     shield: false
-};
+  };
         enemies = []; 
         roadLines = []; 
         sideMarkers = [];    
@@ -296,25 +328,25 @@ function playRandomBG() {
         powerText.textContent = "";
         powerFill.style.width = "0%";
         powerFill.style.background = varColor('--neon-blue');
-  
+
         for (let i = 0; i < H; i += 80) {    
             roadLines.push({ y: i });    
             sideMarkers.push({ y: i });    
         }    
     }    
-  
+
     function varColor(name) { 
         return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); 
     }    
     
- function startGame() {
+  function startGame() {
     startBox.style.display = "none";
     gameOverBox.style.display = "none";
     initGame();
     gameStarted = true;
 
     playRandomBG(); // instant play
-}
+  }
    
     function hit(a, b) {
         return a.x < b.x + b.w && 
@@ -336,7 +368,7 @@ function playRandomBG() {
     w: 50,
     h: 90,
     img: enemyImgs[Math.floor(Math.random() * enemyImgs.length)]
-});
+  });
         }
     }
 
@@ -352,10 +384,10 @@ function playRandomBG() {
     }
 
     ctx.restore();
-}
+  }
 
 
-function drawEnemy(e) {
+  function drawEnemy(e) {
     ctx.save();
 
     ctx.shadowColor = "rgba(255,255,255,0.25)";
@@ -366,7 +398,7 @@ function drawEnemy(e) {
     }
 
     ctx.restore();
-}
+  }
     function drawPowerEffects() {
         if (!powerState) return;
 
@@ -406,7 +438,7 @@ function drawEnemy(e) {
             ctx.restore();
         }
     }
-  
+
     function activatePower() {
         const powers = ["SHIELD", "SLOW", "2X"];    
         powerState = powers[Math.floor(Math.random() * 3)];    
@@ -436,7 +468,7 @@ function drawEnemy(e) {
         ctx.clearRect(0, 0, W, H);
         ctx.fillStyle = "#141414";
         ctx.fillRect(50, 0, 400, H);
-  
+
         // Update and draw road lines
         roadLines.forEach(l => { 
             l.y += speed; 
@@ -454,9 +486,9 @@ function drawEnemy(e) {
             ctx.fillRect(448, s.y, 2, 40); 
         });    
         // subtle road light wash (HD effect)
-ctx.fillStyle = "rgba(255,255,255,0.08)";
-ctx.fillRect(50, 0, 400, H);
-  
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  ctx.fillRect(50, 0, 400, H);
+
         if (gameStarted && !gameOver) {    
             // ========== POWER-UP SYSTEM ==========
             // Active power timer
@@ -494,10 +526,10 @@ ctx.fillRect(50, 0, 400, H);
                     powerFill.style.background = varColor('--neon-blue');
                 }
             }
-let dir = inputDir;    
+  let dir = inputDir;    
             car.x += dir * 7;
             car.x = Math.max(60, Math.min(car.x, 440 - car.w));
-  
+
             // ========== SCORING SYSTEM ==========
             let distanceGained = speed / 12;
             distance += distanceGained;
@@ -534,7 +566,7 @@ let dir = inputDir;
                 activatePower(); 
                 nextPowerScore = score + 400;
             }    
-  
+
             // ========== ENEMY SPAWNING ==========
             spawnTimer++;
             
@@ -561,7 +593,7 @@ let dir = inputDir;
                     } else {    
                         // Game over
                         gameOver = true;
-stopMusic();
+  stopMusic();
                         
                         
                         // Update high score
@@ -583,7 +615,7 @@ stopMusic();
             // ========== DRAWING ==========
             drawPlayer(car); 
             drawPowerEffects();  
-  
+
             // Show power-up message
             if (powerMsgTimer > 0) {    
                 ctx.save(); 
@@ -639,23 +671,22 @@ stopMusic();
     document.addEventListener("touchmove", e => {
         e.preventDefault();
     }, { passive: false });
-  
+
     // Initialize and start game
-    initGame(); 
-    loop();
+    
     function stopMusic() {
     if (currentBG) {
         currentBG.pause();
         currentBG.currentTime = 0;
     }
-}
+  }
 
-document.addEventListener("visibilitychange", () => {
+  document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopMusic();
-});
+  });
 
-window.addEventListener("pagehide", stopMusic);
-window.addEventListener("beforeunload", stopMusic);   
-</script>
-  </body>    
-</html>    
+  window.addEventListener("pagehide", stopMusic);
+  window.addEventListener("beforeunload", stopMusic);   
+  </script>
+</body>
+</html>
