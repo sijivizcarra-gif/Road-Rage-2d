@@ -225,10 +225,6 @@ preloadImages(imageSources, (loadedImages) => {
   bestText.textContent = "Top Record: " + highScore;
 
     // ===== LOAD CAR IMAGES =====
-
-
-
-
     const W = 500, H = 800;    
     const LANES = [85, 165, 245, 325, 405];    
     const COLORS = ["#FF3131", "#00F2FF", "#FFCA3A", "#8AC926", "#6A4C93"];    
@@ -242,26 +238,11 @@ preloadImages(imageSources, (loadedImages) => {
     let originalSpeed = 4; // Store original speed for SLOW power
 
     const bgTracks = [
-  "/Road-Rage-2d/musics/bg1.mp3",
-  "/Road-Rage-2d/musics/bg2.mp3",
-  "/Road-Rage-2d/musics/bg3.mp3",
-  "/Road-Rage-2d/musics/bg4.mp3",
-  "/Road-Rage-2d/musics/bg5.mp3",
-  "/Road-Rage-2d/musics/bg6.mp3",
-  "/Road-Rage-2d/musics/bg7.mp3",
-  "/Road-Rage-2d/musics/bg8.mp3",
-  "/Road-Rage-2d/musics/bg9.mp3",
-  "/Road-Rage-2d/musics/bg10.mp3",
-  "/Road-Rage-2d/musics/bg11.mp3",
-  "/Road-Rage-2d/musics/bg12.mp3",
-  "/Road-Rage-2d/musics/bg13.mp3",
-  "/Road-Rage-2d/musics/bg14.mp3",
-  "/Road-Rage-2d/musics/bg15.mp3",
-  "/Road-Rage-2d/musics/bg16.mp3",
-  "/Road-Rage-2d/musics/bg17.mp3",
-  "/Road-Rage-2d/musics/bg18.mp3",
-  "/Road-Rage-2d/musics/bg19.mp3",
-  "/Road-Rage-2d/musics/bg20.mp3"
+  "/Road-Rage-2d/music/ms1.mp3",
+  "/Road-Rage-2d/music/ms2.mp3",
+  "/Road-Rage-2d/music/ms3.mp3",
+  "/Road-Rage-2d/music/ms4.mp3",
+  "/Road-Rage-2d/music/ms5.mp3"
   ];
 
   const bgAudios = bgTracks.map(src => {
