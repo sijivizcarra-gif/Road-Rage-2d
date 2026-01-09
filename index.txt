@@ -25,22 +25,48 @@
         background: #111;    
     }    /* Modern HUD */    
   #hud {    
-    position: absolute; top: 20px; left: 20px; z-index: 30;    
+    position: absolute; top: 15px; left: 15px; z-index: 30;    
     color: white; pointer-events: none;    
   }    
-  .stat-box { margin-bottom: 10px; }    
-  #scoreText { font-size: 32px; font-weight: 900; color: var(--neon-yellow); text-shadow: 0 0 10px rgba(250,255,0,0.5); }    
-  #bestText { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; }    
-    
-  #powerContainer { margin-top: 15px; }    
-  #powerBar {    
-    width: 150px; height: 6px; background: rgba(255,255,255,0.1);    
-    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);    
+  .stat-box { margin-bottom: 8px; }    
+  #bestText { 
+    font-size: 11px; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    opacity: 0.7; 
+    margin-bottom: 2px;
   }    
-  #powerFill { height: 100%; width: 0%; background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); transition: width 0.1s; }    
+  #scoreText { 
+    font-size: 28px; 
+    font-weight: 900; 
+    color: var(--neon-yellow); 
+    text-shadow: 0 0 8px rgba(250,255,0,0.5);
+    line-height: 1;
+  }    
+    
+  #powerContainer { margin-top: 10px; }    
+  #powerBar {    
+    width: 120px; 
+    height: 4px; 
+    background: rgba(255,255,255,0.1);    
+    border-radius: 2px; 
+    overflow: hidden; 
+    border: 1px solid rgba(255,255,255,0.15);    
+  }    
+  #powerFill { 
+    height: 100%; 
+    width: 0%; 
+    background: var(--neon-blue); 
+    box-shadow: 0 0 6px var(--neon-blue); 
+    transition: width 0.1s; 
+  }    
 
   #powerText {    
-    font-size: 14px; color: var(--neon-blue); margin-top: 6px; text-transform: uppercase; letter-spacing: 1px;    
+    font-size: 11px; 
+    color: var(--neon-blue); 
+    margin-top: 4px; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;    
   }    
 
   /* Professional Overlays */    
@@ -106,6 +132,327 @@
     text-shadow: 0 0 20px rgba(250,255,0,0.3);
   }
 
+  /* Pause Button Styles */
+  #pauseBtn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 30;
+    background: transparent;
+    border: none;
+    color: var(--neon-blue);
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    filter: drop-shadow(0 0 6px rgba(0, 242, 255, 0.5));
+  }
+
+  #pauseBtn:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.8));
+  }
+
+  #pauseBtn:active {
+    transform: scale(0.95);
+  }
+
+  #pauseBtn svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .pause-icon {
+    display: block;
+  }
+
+  .play-icon {
+    display: none;
+  }
+
+  #pauseBtn.paused .pause-icon {
+    display: none;
+  }
+
+  #pauseBtn.paused .play-icon {
+    display: block;
+  }
+
+  /* Pause Menu Overlay */
+  #pauseMenu {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 5, 0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .pause-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--neon-blue);
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 30px var(--neon-blue);
+  }
+
+  /* Countdown Overlay */
+  #countdownOverlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 5, 0.9);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 60;
+  }
+
+  .countdown-number {
+    font-size: 10rem;
+    font-weight: 900;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 40px var(--neon-yellow);
+    animation: pulse 1s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+  }
+
+  .countdown-message {
+    font-size: 1.5rem;
+    color: white;
+    margin-top: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.8;
+  }
+
+  /* Background Pause Indicator */
+  .bg-pause-indicator {
+    position: absolute;
+    top: 60px;
+    right: 15px;
+    background: rgba(255, 100, 100, 0.2);
+    color: var(--neon-red);
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: none;
+    z-index: 31;
+    border: 1px solid rgba(255, 100, 100, 0.3);
+  }
+
+  /* Simple Top Messages */
+  .top-message {
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    color: white;
+    z-index: 25;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1 ease-in-out;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    max-width: 80%;
+    line-height: 1.4;
+  }
+
+  /* Car Selection Styles */
+  #carSelectBox {
+    position: absolute;
+    width: 420px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-top: 5px solid var(--neon-yellow);
+    color: white;
+    padding: 30px;
+    text-align: center;
+    z-index: 100;
+    border-radius: 4px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .car-select-title {
+    font-size: 2rem;
+    margin: 0 0 25px 0;
+    letter-spacing: -1px;
+    font-style: italic;
+    color: var(--neon-yellow);
+    text-transform: uppercase;
+  }
+
+  .car-select-subtitle {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+
+  .car-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+    width: 100%;
+  }
+
+  .car-option {
+    background: rgba(30, 30, 30, 0.7);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+  }
+
+  .car-option:hover {
+    background: rgba(50, 50, 50, 0.7);
+    transform: translateY(-5px);
+  }
+
+  .car-option.selected {
+    border-color: var(--neon-yellow);
+    background: rgba(250, 255, 0, 0.1);
+    box-shadow: 0 0 20px rgba(250, 255, 0, 0.3);
+  }
+
+  .car-option.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+    position: relative;
+  }
+
+  .car-option.locked::after {
+    content: "🔒";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 16px;
+  }
+
+  .car-preview {
+    width: 80px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+  }
+
+  .car-name {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .car-stats {
+    font-size: 10px;
+    color: #aaa;
+    display: flex;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .car-unlock-req {
+    font-size: 9px;
+    color: var(--neon-yellow);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  .car-nav {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .nav-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+
+  .nav-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+  }
+
+  .car-preview-container {
+    width: 200px;
+    height: 120px;
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 10px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+
+  .selected-car-preview {
+    width: 160px;
+    height: 100px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+  }
+
+  /* Simplified car stats */
+  .car-simple-stats {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 5px;
+    text-align: center;
+  }
+
   </style>
 </head>
 <body>
@@ -125,12 +472,72 @@
       </div>
     </div>
   </div>
+  
+  <!-- Simple Top Message -->
+  <div class="top-message" id="topMessage"></div>
+  
+  <!-- Background Pause Indicator -->
+  <div class="bg-pause-indicator" id="bgPauseIndicator">
+    Auto Pause
+  </div>
+  
+  <!-- Pause Button -->
+  <button id="pauseBtn" onclick="togglePause()">
+    <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="4" width="4" height="16"></rect>
+      <rect x="14" y="4" width="4" height="16"></rect>
+    </svg>
+    <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="5,3 19,12 5,21"></polygon>
+    </svg>
+  </button>
+  
+  <!-- Pause Menu -->
+  <div id="pauseMenu">
+    <div class="pause-title">PAUSED</div>
+    <button class="btn-pro" onclick="resumeGame()">RESUME</button>
+    <button class="btn-pro" style="margin-top: 20px; background: rgba(255,255,255,0.1); color: white;" onclick="restartGame()">RESTART</button>
+    <button class="btn-pro" style="margin-top: 20px; background: var(--neon-red);" onclick="quitToMenu()">QUIT</button>
+  </div>
+  
+  <!-- Countdown Overlay -->
+  <div id="countdownOverlay">
+    <div class="countdown-number">3</div>
+    <div class="countdown-message">Get Ready!</div>
+  </div>
+  
+  <!-- Car Selection Box -->
+  <div id="carSelectBox">
+    <div class="car-select-title">SELECT YOUR RIDE</div>
+    <div class="car-select-subtitle">Choose your vehicle and dominate the highway</div>
+    
+    <div class="car-preview-container">
+      <img id="selectedCarPreview" class="selected-car-preview" src="" alt="Selected Car">
+    </div>
+    
+    <div class="car-grid" id="carGrid">
+      <!-- Car options will be dynamically generated here -->
+    </div>
+    
+    <!-- Removed complex stats display -->
+    
+    <div class="car-nav">
+      <button class="nav-btn" onclick="prevCarPage()">❮</button>
+      <button class="btn-pro" onclick="confirmCarSelection()" style="width: 200px;">SELECT & PLAY</button>
+      <button class="nav-btn" onclick="nextCarPage()">❯</button>
+    </div>
+    
+    <button class="btn-pro" style="margin-top: 15px; background: rgba(255,255,255,0.05);" onclick="backToMenu()">BACK TO MENU</button>
+  </div>
+  
   <canvas id="game" width="500" height="800"></canvas>
   <div id="startBox" class="overlay">
     <h1>ROAD<br>
     <span style="color:var(--neon-yellow)">RAGE 2D</span></h1>
     <p>Master the highway. Avoid traffic.<br>
-    Use power-ups to survive.</p><button class="btn-pro" onclick="startGame()">Ignite Engine</button>
+    Use power-ups to survive.</p>
+    <button class="btn-pro" onclick="showCarSelection()">SELECT CAR</button>
+    <button class="btn-pro" style="margin-top: 15px; background: rgba(255,255,255,0.05);" onclick="quickStart()">QUICK START</button>
   </div>
   <div id="gameOverBox" class="overlay">
     <h1 style="color: var(--neon-red)">WASTED</h1>
@@ -139,7 +546,9 @@
     </div>
     <div id="finalScore" class="final-score-val">
       0
-    </div><button class="btn-pro blink" onclick="startGame()">Respawn</button>
+    </div>
+    <button class="btn-pro blink" onclick="showCarSelection()">PLAY AGAIN</button>
+    <button class="btn-pro" style="margin-top: 15px; background: rgba(255,255,255,0.05);" onclick="backToMenuFromGameOver()">MAIN MENU</button>
   </div>
   <script>
     
@@ -158,22 +567,22 @@
     });
 }
 const imageSources = [
-    "/Road-Rage-2d/image/image2.png", // player
-    "/Road-Rage-2d/image/image1.png",
-    "/Road-Rage-2d/image/image3.png",
-    "/Road-Rage-2d/image/image4.png",
-    "/Road-Rage-2d/image/image5.png",
-    "/Road-Rage-2d/image/image6.png",
-    "/Road-Rage-2d/image/image7.png",
-    "/Road-Rage-2d/image/image8.png",
-    "/Road-Rage-2d/image/image9.png"
+    "imahe/image2.png", 
+    "imahe/image1.png",
+    "imahe/image3.png",
+    "imahe/image4.png",
+    "imahe/image5.png",
+    "imahe/image6.png",
+    "imahe/image7.png",
+    "imahe/image8.png",
+    "imahe/image9.png"
 ];
 let playerImg, enemyImgs;
 
 preloadImages(imageSources, (loadedImages) => {
     playerImg = loadedImages[0];           // first image = player
     enemyImgs = loadedImages.slice(1);     // rest = enemies
-
+    
     // Now safe to start the game
     initGame(); 
     loop();  // start the render loop
@@ -184,6 +593,7 @@ preloadImages(imageSources, (loadedImages) => {
   window.addEventListener("keydown", e => {
     if (e.key === "ArrowLeft" || e.key === "a") inputDir = -1;
     if (e.key === "ArrowRight" || e.key === "d") inputDir = 1;
+    if (e.key === "Escape" || e.key === "p") togglePause();
   });
 
   window.addEventListener("keyup", e => {
@@ -219,7 +629,16 @@ preloadImages(imageSources, (loadedImages) => {
     const startBox = document.getElementById("startBox");    
     const gameOverBox = document.getElementById("gameOverBox");    
     const finalScore = document.getElementById("finalScore");    
-    
+    const pauseBtn = document.getElementById("pauseBtn");
+    const pauseMenu = document.getElementById("pauseMenu");
+    const countdownOverlay = document.getElementById("countdownOverlay");
+    const countdownNumber = countdownOverlay.querySelector('.countdown-number');
+    const bgPauseIndicator = document.getElementById("bgPauseIndicator");
+    const topMessage = document.getElementById("topMessage");
+    const carSelectBox = document.getElementById("carSelectBox");
+    const carGrid = document.getElementById("carGrid");
+    const selectedCarPreview = document.getElementById("selectedCarPreview");
+    const carStats = document.getElementById("carStats");
     
     let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
   bestText.textContent = "Top Record: " + highScore;
@@ -236,13 +655,135 @@ preloadImages(imageSources, (loadedImages) => {
     let baseDistance = 0; // Para sa tamang scoring ng 2X
     let slowMultiplier = 1; // Para sa SLOW power
     let originalSpeed = 4; // Store original speed for SLOW power
+    let scoreDuring2X = 0; // NEW: Track score during 2X to prevent drop when power ends
+    let gamePaused = false; // Pause state
+    let isCountdown = false; // Countdown state
+    let autoPaused = false; // Track if paused automatically
+    let messageTimer = 0; // Timer for messages
+    let lastMessageTime = 0; // Track when last message showed
+    let selectedCarIndex = 0; // Currently selected car index
+    let currentCarPage = 0; // Current car selection page
+    let unlockedCars = [0]; // Array of unlocked car indices (start with first car)
+
+    // Simple motivational messages (paminsan-minsan lang)
+    const simpleMessages = [
+      "Miss mo na ba s'ya?",
+      "What if mahal ka pa n'ya?",
+      "Galing mo, sana ginalingan mo rin nong kayo pa",
+      "Okay lang 'yan",
+      "Kaya pa 'yan late game",
+      "What if ikaw lang ang pinili dahil ikaw lang ang nariyan?",
+      "Don't give up!",
+      "Ilaban mo parehas nong time na nilaban mo s'ya kahit iba na ang kanyang ipinaglalaban!",
+      "Sarap sana ng ngiti mo kung kayo pa no?",
+      "Akala mo mahal ka n'ya?",
+      "Sana ikaw na lang no?",
+      "Ulol na ulol ka tapos s'ya ulol na ulol sa iba",
+      "Masarap ba na parang wala ka lang sa kanya?",
+      "Kaya pa yan late game",
+      "Walang silbi 'yang tank build kung makita mong masaya na s'ya sa piling ng iba"
+    ];
+
+    // Car database with stats and requirements
+    const carDatabase = [
+      {
+        name: "Street Racer",
+        image: "imahe/image2.png",
+        speed: 7,
+        handling: 8,
+        acceleration: 9,
+        description: "Balanced performance",
+        unlocked: true,
+        unlockRequirement: "Starting Car"
+      },
+      {
+        name: "Speed Demon",
+        image: "imahe/image1.png",
+        speed: 9,
+        handling: 6,
+        acceleration: 8,
+        description: "Extreme top speed",
+        unlocked: false,
+        unlockRequirement: "Reach 2000 points"
+      },
+      {
+        name: "Drift King",
+        image: "imahe/image3.png",
+        speed: 6,
+        handling: 10,
+        acceleration: 7,
+        description: "Perfect control",
+        unlocked: false,
+        unlockRequirement: "Reach 3000 points"
+      },
+      {
+        name: "Muscle Car",
+        image: "imahe/image4.png",
+        speed: 8,
+        handling: 5,
+        acceleration: 10,
+        description: "Rapid acceleration",
+        unlocked: false,
+        unlockRequirement: "Reach 4000 points"
+      },
+      {
+        name: "Sports Classic",
+        image: "imahe/image5.png",
+        speed: 7,
+        handling: 9,
+        acceleration: 6,
+        description: "Vintage style",
+        unlocked: false,
+        unlockRequirement: "Reach 5000 points"
+      },
+      {
+        name: "Hyper Car",
+        image: "imahe/image6.png",
+        speed: 10,
+        handling: 7,
+        acceleration: 9,
+        description: "Ultimate performance",
+        unlocked: false,
+        unlockRequirement: "Reach 10000 points"
+      },
+      {
+        name: "Cyber Racer",
+        image: "imahe/image7.png",
+        speed: 8,
+        handling: 8,
+        acceleration: 8,
+        description: "Futuristic tech",
+        unlocked: false,
+        unlockRequirement: "Beat high score"
+      },
+      {
+        name: "Neon Cruiser",
+        image: "imahe/image8.png",
+        speed: 6,
+        handling: 9,
+        acceleration: 7,
+        description: "Glow in the dark",
+        unlocked: false,
+        unlockRequirement: "Play 10 games"
+      },
+      {
+        name: "Monster Truck",
+        image: "imahe/image9.png",
+        speed: 5,
+        handling: 4,
+        acceleration: 5,
+        description: "Crush everything",
+        unlocked: false,
+        unlockRequirement: "Unlock all other cars"
+      }
+    ];
 
     const bgTracks = [
-  "/Road-Rage-2d/music/ms1.mp3",
-  "/Road-Rage-2d/music/ms2.mp3",
-  "/Road-Rage-2d/music/ms3.mp3",
-  "/Road-Rage-2d/music/ms4.mp3",
-  "/Road-Rage-2d/music/ms5.mp3"
+  "music/ms1.mp3",
+  "music/ms2.mp3",
+  "music/ms3.mp3",
+  "music/ms4.mp3",
+  "music/ms5.mp3"
   ];
 
   const bgAudios = bgTracks.map(src => {
@@ -255,8 +796,11 @@ preloadImages(imageSources, (loadedImages) => {
 
   let currentBG = null;
   let lastIndex = -1;
+  let musicEnabled = true;
 
   function playRandomBG() {
+    if (!musicEnabled) return;
+    
     let index;
     do {
         index = Math.floor(Math.random() * bgAudios.length);
@@ -270,7 +814,14 @@ preloadImages(imageSources, (loadedImages) => {
     }
 
     currentBG = bgAudios[index];
-    currentBG.play().catch(()=>{});
+    const playPromise = currentBG.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.catch(e => {
+            console.log("Audio play failed:", e);
+            musicEnabled = false;
+        });
+    }
 
     // auto-next kapag natapos
     currentBG.onended = playRandomBG;
@@ -304,29 +855,50 @@ preloadImages(imageSources, (loadedImages) => {
         powerMsgTimer = 0; 
         gameOver = false;    
         baseDistance = 0; // Reset base distance
+        scoreDuring2X = 0; // NEW: Reset
+        gamePaused = false; // Reset pause state
+        isCountdown = false; // Reset countdown
+        autoPaused = false; // Reset auto-pause
+        messageTimer = 0; // Reset message timer
+        lastMessageTime = 0; // Reset last message time
         
         // RESET POWER UI ELEMENTS
         powerText.textContent = "";
         powerFill.style.width = "0%";
-        powerFill.style.background = varColor('--neon-blue');
+        powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+
+        // Hide pause UI elements and reset button state
+        pauseMenu.style.display = "none";
+        countdownOverlay.style.display = "none";
+        bgPauseIndicator.style.display = "none";
+        pauseBtn.style.display = "none";
+        pauseBtn.classList.remove("paused"); // Reset to pause icon
+        
+        // Hide top message
+        topMessage.style.opacity = "0";
 
         for (let i = 0; i < H; i += 80) {    
             roadLines.push({ y: i });    
             sideMarkers.push({ y: i });    
         }    
     }    
-
-    function varColor(name) { 
-        return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); 
-    }    
     
   function startGame() {
     startBox.style.display = "none";
-    gameOverBox.style.display = "none";
+    gameOverBox.style.display = "none"; // ADDED: Hide game over box
+    carSelectBox.style.display = "none";
     initGame();
     gameStarted = true;
+    pauseBtn.style.display = "flex"; // Show pause button
+    pauseBtn.classList.remove("paused"); // Ensure it shows pause icon
 
-    playRandomBG(); // instant play
+    // Try to play music, but don't fail if blocked
+    try {
+        playRandomBG();
+    } catch (e) {
+        console.log("Music play failed:", e);
+        musicEnabled = false;
+    }
   }
    
     function hit(a, b) {
@@ -380,6 +952,7 @@ preloadImages(imageSources, (loadedImages) => {
 
     ctx.restore();
   }
+  
     function drawPowerEffects() {
         if (!powerState) return;
 
@@ -441,8 +1014,346 @@ preloadImages(imageSources, (loadedImages) => {
         if (powerState === "2X") {
             scoreMultiplier = 2;
             baseDistance = distance; // Store current distance
+            scoreDuring2X = score; // Store current score when 2X starts
         }
     }
+    
+    // ===== CAR SELECTION SYSTEM =====
+    function showCarSelection() {
+        startBox.style.display = "none";
+        gameOverBox.style.display = "none"; // FIXED: Hide game over box
+        updateUnlockedCars();
+        renderCarSelection();
+        carSelectBox.style.display = "flex";
+    }
+    
+    function updateUnlockedCars() {
+        // Get unlocked cars from localStorage
+        const savedUnlocked = localStorage.getItem("rr_unlocked_cars");
+        if (savedUnlocked) {
+            unlockedCars = JSON.parse(savedUnlocked);
+        } else {
+            unlockedCars = [0]; // Start with first car
+            localStorage.setItem("rr_unlocked_cars", JSON.stringify(unlockedCars));
+        }
+        
+        // Unlock cars based on high score
+        const checkpoints = [2000, 3000, 4000, 5000, 10000];
+        checkpoints.forEach((checkpoint, index) => {
+            if (highScore >= checkpoint && !unlockedCars.includes(index + 1)) {
+                unlockedCars.push(index + 1);
+            }
+        });
+        
+        // Save updated unlocked cars
+        localStorage.setItem("rr_unlocked_cars", JSON.stringify(unlockedCars));
+        
+        // Update car database
+        carDatabase.forEach((car, index) => {
+            car.unlocked = unlockedCars.includes(index);
+        });
+    }
+    
+    function renderCarSelection() {
+        carGrid.innerHTML = '';
+        const carsPerPage = 6;
+        const startIndex = currentCarPage * carsPerPage;
+        const endIndex = Math.min(startIndex + carsPerPage, carDatabase.length);
+        
+        for (let i = startIndex; i < endIndex; i++) {
+            const carData = carDatabase[i];
+            const carOption = document.createElement('div');
+            carOption.className = `car-option ${carData.unlocked ? '' : 'locked'} ${i === selectedCarIndex ? 'selected' : ''}`;
+            carOption.onclick = () => selectCar(i);
+            
+            // Simplified display - removed handling and acceleration
+            carOption.innerHTML = `
+                <img src="${carData.image}" class="car-preview" alt="${carData.name}">
+                <div class="car-name">${carData.name}</div>
+                <div class="car-simple-stats">
+                    Speed: ${carData.speed}/10<br>
+                    ${carData.description}
+                </div>
+                ${!carData.unlocked ? `<div class="car-unlock-req">${carData.unlockRequirement}</div>` : ''}
+            `;
+            
+            carGrid.appendChild(carOption);
+        }
+        
+        // Update selected car preview
+        const selectedCar = carDatabase[selectedCarIndex];
+        selectedCarPreview.src = selectedCar.image;
+    }
+    
+    function selectCar(index) {
+        const carData = carDatabase[index];
+        if (!carData.unlocked) {
+            showTopMessage("Locked! " + carData.unlockRequirement);
+            return;
+        }
+        
+        selectedCarIndex = index;
+        renderCarSelection();
+    }
+    
+    function prevCarPage() {
+        if (currentCarPage > 0) {
+            currentCarPage--;
+            renderCarSelection();
+        }
+    }
+    
+    function nextCarPage() {
+        const totalPages = Math.ceil(carDatabase.length / 6);
+        if (currentCarPage < totalPages - 1) {
+            currentCarPage++;
+            renderCarSelection();
+        }
+    }
+    
+    function confirmCarSelection() {
+        const selectedCar = carDatabase[selectedCarIndex];
+        if (!selectedCar.unlocked) {
+            showTopMessage("This car is locked!");
+            return;
+        }
+        
+        // Load the selected car image
+        const img = new Image();
+        img.src = selectedCar.image;
+        img.onload = () => {
+            playerImg = img;
+            startGame();
+        };
+        img.onerror = () => {
+            // Fallback to default car if image fails to load
+            startGame();
+        };
+    }
+    
+    function quickStart() {
+        // Use default car (index 0)
+        selectedCarIndex = 0;
+        const img = new Image();
+        img.src = carDatabase[0].image;
+        img.onload = () => {
+            playerImg = img;
+            startGame();
+        };
+        img.onerror = () => {
+            startGame();
+        };
+    }
+    
+    function backToMenu() {
+        carSelectBox.style.display = "none";
+        startBox.style.display = "flex";
+    }
+    
+    function backToMenuFromGameOver() {
+        gameOverBox.style.display = "none";
+        startBox.style.display = "flex";
+    }
+    
+    // ===== SIMPLE MESSAGES SYSTEM =====
+    function showTopMessage(message) {
+        if (!gameStarted || gamePaused || isCountdown || gameOver) return;
+        
+        // Don't show if another message is still visible
+        if (parseFloat(topMessage.style.opacity) > 0) return;
+        
+        topMessage.textContent = message;
+        topMessage.style.opacity = "1";
+        
+        // Set timer to hide message after 2 seconds
+        messageTimer = 120; // 2 seconds at 60fps
+        lastMessageTime = score; // Track when we showed last message
+    }
+    
+    function updateTopMessage() {
+        if (messageTimer > 0) {
+            messageTimer--;
+            
+            // Fade out in last 40 frames (0.66 seconds)
+            if (messageTimer <= 40) {
+                topMessage.style.opacity = (messageTimer / 40).toString();
+            }
+        }
+    }
+    
+    function showRandomMessage() {
+        if (!gameStarted || gamePaused || isCountdown || gameOver) return;
+        
+        // Don't show if message is already visible
+        if (parseFloat(topMessage.style.opacity) > 0) return;
+        
+        // Paminsan-minsan lang - only show every 30-40 seconds
+        // And only if at least 500 points have passed since last message
+        if (score - lastMessageTime > 500 && Math.random() < 0.002) { // 0.2% chance per frame
+            const randomIndex = Math.floor(Math.random() * simpleMessages.length);
+            showTopMessage(simpleMessages[randomIndex]);
+        }
+        
+        // Special messages on milestones
+        if (score > 0 && score % 1000 === 0 && score - lastMessageTime > 300) {
+            showTopMessage(`${score} points! Awesome!`);
+        }
+        
+        // Message when close to high score
+        if (highScore > 0 && score > highScore - 200 && score < highScore) {
+            if (score - lastMessageTime > 400) {
+                showTopMessage("Almost beat your record!");
+            }
+        }
+        
+        // Message when power is activated
+        if (powerMsgTimer === 59) { // When power message just showed
+            if (score - lastMessageTime > 300) {
+                showTopMessage(" what if mahal ka pa n'ya? Power up boi!");
+            }
+        }
+    }
+    
+    // ===== PAUSE/RESUME FUNCTIONS =====
+    function togglePause() {
+        if (!gameStarted || gameOver || isCountdown) return;
+        
+        if (!gamePaused) {
+            // Pause the game
+            pauseGame(false); // false = manual pause
+        } else {
+            // If already paused, resume directly
+            resumeGame();
+        }
+    }
+    
+    function pauseGame(isAutoPause) {
+        if (gamePaused || !gameStarted || gameOver || isCountdown) return;
+        
+        gamePaused = true;
+        autoPaused = isAutoPause;
+        
+        if (isAutoPause) {
+            // Auto-pause - show indicator but not full menu
+            bgPauseIndicator.style.display = "block";
+            pauseBtn.classList.add("paused"); // Change to play icon
+        } else {
+            // Manual pause - show full menu
+            pauseMenu.style.display = "flex";
+            pauseBtn.classList.add("paused"); // Change to play icon
+            bgPauseIndicator.style.display = "none"; // Hide auto-pause indicator
+        }
+        
+        // Pause music
+        if (currentBG) {
+            currentBG.pause();
+        }
+        
+        // Hide top message when paused
+        topMessage.style.opacity = "0";
+    }
+    
+    function resumeGame() {
+        if (!gamePaused) return;
+        
+        // Hide pause UI elements
+        pauseMenu.style.display = "none";
+        bgPauseIndicator.style.display = "none";
+        
+        // Start countdown
+        startCountdown();
+    }
+    
+    function startCountdown() {
+        isCountdown = true;
+        countdownOverlay.style.display = "flex";
+        
+        let count = 3;
+        countdownNumber.textContent = count;
+        
+        const countdownInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownNumber.textContent = count;
+            } else {
+                countdownNumber.textContent = "GO!";
+                
+                // After "GO!", resume game
+                setTimeout(() => {
+                    clearInterval(countdownInterval);
+                    countdownOverlay.style.display = "none";
+                    gamePaused = false;
+                    isCountdown = false;
+                    autoPaused = false;
+                    pauseBtn.classList.remove("paused"); // Change back to pause icon
+                    
+                    // Resume music
+                    if (currentBG && musicEnabled) {
+                        currentBG.play().catch(() => {
+                            musicEnabled = false;
+                        });
+                    }
+                }, 1000);
+            }
+        }, 1000);
+    }
+    
+    function restartGame() {
+        // Close pause menu
+        pauseMenu.style.display = "none";
+        bgPauseIndicator.style.display = "none";
+        gamePaused = false;
+        autoPaused = false;
+        pauseBtn.classList.remove("paused"); // Reset to pause icon
+        
+        // Restart the game with current selected car
+        const img = new Image();
+        img.src = carDatabase[selectedCarIndex].image;
+        img.onload = () => {
+            playerImg = img;
+            startGame();
+        };
+        img.onerror = () => {
+            startGame();
+        };
+    }
+    
+    function quitToMenu() {
+        // Close pause menu
+        pauseMenu.style.display = "none";
+        bgPauseIndicator.style.display = "none";
+        gamePaused = false;
+        gameStarted = false;
+        autoPaused = false;
+        pauseBtn.style.display = "none";
+        pauseBtn.classList.remove("paused"); // Reset to pause icon for next game
+        
+        // Show car selection
+        showCarSelection();
+        
+        // Stop music
+        stopMusic();
+    }
+    
+    // ===== PAGE VISIBILITY HANDLER =====
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            // Page is hidden (tab switched, app minimized, etc.)
+            if (gameStarted && !gameOver && !gamePaused && !isCountdown) {
+                pauseGame(true); // Auto-pause the game
+            }
+            // Always stop music when page is hidden
+            if (currentBG) {
+                currentBG.pause();
+            }
+        } else {
+            // Page is visible again
+            // Note: We don't auto-resume here - user needs to click resume
+        }
+    }
+    
+    // Set up visibility change listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
         
     function loop() {    
         // Clear canvas
@@ -466,48 +1377,59 @@ preloadImages(imageSources, (loadedImages) => {
             ctx.fillRect(50, s.y, 2, 40); 
             ctx.fillRect(448, s.y, 2, 40); 
         });    
+        
         // subtle road light wash (HD effect)
-  ctx.fillStyle = "rgba(255,255,255,0.08)";
-  ctx.fillRect(50, 0, 400, H);
+        ctx.fillStyle = "rgba(255,255,255,0.08)";
+        ctx.fillRect(50, 0, 400, H);
 
-        if (gameStarted && !gameOver) {    
+        if (gameStarted && !gameOver && !gamePaused && !isCountdown) {    
+            // ========== SIMPLE MESSAGES ==========
+            updateTopMessage();
+            showRandomMessage();
+            
             // ========== POWER-UP SYSTEM ==========
             // Active power timer
             if (powerTimer > 0) {
                 powerTimer--;
                 powerFill.style.width = (powerTimer / 300 * 100) + "%";
-                powerFill.style.background = varColor('--neon-blue');
+                powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
                 
                 if (powerTimer <= 0) {
                     // Power expired
                     if (powerState === "SHIELD") car.shield = false;
                     if (powerState === "SLOW") {
                         slowMultiplier = 1;
-                        // No need to restore speed here, it will be calculated normally
                     }
                     if (powerState === "2X") {
                         scoreMultiplier = 1;
+                        // FIXED: Ensure score doesn't drop when 2X ends
+                        // Update distance to match the doubled score we achieved
+                        if (score > distance) {
+                            distance = score; // Keep the higher score as distance
+                        }
                     }
                     
                     powerState = null;
                     powerText.textContent = "";
                     powerFill.style.width = "0%";
-                    powerFill.style.background = varColor('--neon-blue');
+                    powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
                 }
             }
             
             // Cooldown timer (shows when next power available)
             if (powerState === null && powerCooldown > 0) {
                 powerCooldown--;
-                powerFill.style.width = ((1 - powerCooldown / 900) * 100) + "%";
+                let cooldownPercent = Math.max(0, ((900 - powerCooldown) / 900) * 100);
+                powerFill.style.width = cooldownPercent + "%";
                 powerFill.style.background = "#666";
                 
                 if (powerCooldown <= 0) {
                     powerFill.style.width = "0%";
-                    powerFill.style.background = varColor('--neon-blue');
+                    powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
                 }
             }
-  let dir = inputDir;    
+            
+            let dir = inputDir;    
             car.x += dir * 7;
             car.x = Math.max(60, Math.min(car.x, 440 - car.w));
 
@@ -522,7 +1444,8 @@ preloadImages(imageSources, (loadedImages) => {
                 // Score = base score + (new distance * 2)
                 score = Math.floor(baseDistance + (newDistance * 2));
             } else {
-                score = Math.floor(distance);
+                // FIXED: Use Math.max to ensure score never decreases
+                score = Math.max(score, Math.floor(distance));
             }
             
             scoreText.textContent = score;    
@@ -535,12 +1458,20 @@ preloadImages(imageSources, (loadedImages) => {
             let smoothSpeed = distance / 600;
             let calculatedSpeed = Math.min(10, baseSpeed + levelSpeed + smoothSpeed);
             
+            // Apply car speed bonus based on selected car
+            const selectedCar = carDatabase[selectedCarIndex];
+            let carSpeedBonus = (selectedCar.speed - 7) * 0.1; // -0.2 to +0.3
+            let carHandlingBonus = (selectedCar.handling - 8) * 0.05; // -0.15 to +0.1
+            
             // Apply SLOW effect if active
             if (powerState === "SLOW" && powerTimer > 0) {
-                speed = calculatedSpeed * slowMultiplier; // 60% speed
+                speed = calculatedSpeed * slowMultiplier * (1 + carSpeedBonus);
             } else {
-                speed = calculatedSpeed;
+                speed = calculatedSpeed * (1 + carSpeedBonus);
             }
+            
+            // Apply handling bonus to turning
+            car.x += dir * (7 + carHandlingBonus * 2);
 
             // ========== POWER-UP SPAWNING ==========
             if (score >= nextPowerScore && powerState === null && powerCooldown <= 0) { 
@@ -574,19 +1505,22 @@ preloadImages(imageSources, (loadedImages) => {
                     } else {    
                         // Game over
                         gameOver = true;
-  stopMusic();
-                        
+                        stopMusic();
                         
                         // Update high score
-                        
-            if (score > highScore) { 
+                        if (score > highScore) { 
                             highScore = score; 
                             localStorage.setItem("rr_high_pro", score); 
                             bestText.textContent = "Top Record: " + score; 
                         }    
                         
+                        // Update unlocked cars
+                        updateUnlockedCars();
+                        
                         finalScore.textContent = score; 
-                        gameOverBox.style.display = "flex";    
+                        gameOverBox.style.display = "flex";
+                        pauseBtn.style.display = "none"; // Hide pause button on game over
+                        bgPauseIndicator.style.display = "none"; // Hide auto-pause indicator
                     }    
                 }  
             });  
@@ -631,23 +1565,24 @@ preloadImages(imageSources, (loadedImages) => {
                 ctx.restore();
             }
             
-            // Show current speed
+            // Show current speed with car name
             ctx.save();
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = "#fff";
             ctx.font = "12px sans-serif";
             ctx.textAlign = "left";
-            ctx.fillText("Speed: " + speed.toFixed(1), 20, H - 20);
+            ctx.fillText(`Speed: ${speed.toFixed(1)} | Car: ${carDatabase[selectedCarIndex].name}`, 20, H - 20);
             ctx.restore();
-        } else {
+        } else if (!gameOver) {
             // Kapag hindi naglalaro (game over o nasa menu), i-reset ang power UI
             powerText.textContent = "";
             powerFill.style.width = "0%";
-            powerFill.style.background = varColor('--neon-blue');
+            powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
         }
         
         requestAnimationFrame(loop);    
     }    
+        
     // Prevent touch scrolling
     document.addEventListener("touchmove", e => {
         e.preventDefault();
@@ -656,18 +1591,23 @@ preloadImages(imageSources, (loadedImages) => {
     // Initialize and start game
     
     function stopMusic() {
-    if (currentBG) {
-        currentBG.pause();
-        currentBG.currentTime = 0;
+        if (currentBG) {
+            currentBG.pause();
+            currentBG.currentTime = 0;
+        }
     }
-  }
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopMusic();
-  });
+    // Keep existing visibility change for music only
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            if (currentBG) {
+                currentBG.pause();
+            }
+        }
+    });
 
-  window.addEventListener("pagehide", stopMusic);
-  window.addEventListener("beforeunload", stopMusic);   
+    window.addEventListener("pagehide", stopMusic);
+    window.addEventListener("beforeunload", stopMusic);   
   </script>
 </body>
 </html>
