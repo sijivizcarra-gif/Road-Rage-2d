@@ -703,6 +703,7 @@
     let cacheCheckInterval;
 
     // ===== OFFLINE AUDIO SYSTEM =====
+    // FIXED: Use relative paths to match service worker
     const bgTracks = [
       "music/ms1.m4a",
       "music/ms2.m4a",
@@ -719,10 +720,18 @@
         const cache = await caches.open('road-rage-complete-v1.0');
         const keys = await cache.keys();
         
-        const audioFiles = keys.filter(key => 
-          key.url.includes('.m4a') && 
-          key.url.includes('/Road-Rage-2d/music/')
-        );
+        // FIXED: Check for both absolute and relative paths
+        const audioFiles = keys.filter(key => {
+          const url = key.url.toLowerCase();
+          return url.includes('.m4a') && (
+            url.includes('music/ms1.m4a') ||
+            url.includes('music/ms2.m4a') ||
+            url.includes('music/ms3.m4a') ||
+            url.includes('music/ms4.m4a') ||
+            url.includes('music/ms5.m4a') ||
+            url.includes('/road-rage-2d/music/')
+          );
+        });
         
         console.log(`🎵 Audio cache status: ${audioFiles.length}/5 files`);
         
@@ -883,6 +892,7 @@
       });
     }
 
+    // FIXED: Use relative paths for images too
     const imageSources = [
       "imahe/image2.png", 
       "imahe/image1.png",
@@ -937,6 +947,7 @@
     window.addEventListener("mouseup", () => inputDir = 0);
 
     // ===== CAR DATABASE =====
+    // FIXED: Use relative paths for car images
     const carDatabase = [
       {
         name: "Street Racer",
@@ -1876,6 +1887,22 @@
         createAudioSystem();
       }
     }, { once: true });
+
+    // ===== INITIAL CACHE CHECK =====
+    window.addEventListener('load', () => {
+      // Check initial cache status
+      setTimeout(() => {
+        verifyAudioCache().then(cached => {
+          if (cached) {
+            console.log('✅ Game is fully cached for offline play');
+          } else if (navigator.onLine) {
+            console.log('🌐 Online - game will cache in background');
+          } else {
+            console.log('📴 Offline - some features may not work');
+          }
+        });
+      }, 1000);
+    });
 
   </script>
 </body>
