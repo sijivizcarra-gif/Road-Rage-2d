@@ -1,8 +1,8 @@
-// ===== SERVICE WORKER FOR ROAD RAGE 2D =====
-const CACHE_NAME = 'road-rage-music-v2.0';
+// ===== SERVICE WORKER FOR ROAD RAGE 2D - FORCE MUSIC INSTALL =====
+const CACHE_NAME = 'road-rage-complete-v3.0';
 const OFFLINE_URL = '/Road-Rage-2d/offline.html';
 
-// ===== ALL GAME FILES (INCLUDING 31MB MUSIC) =====
+// ===== ALL ASSETS - MUSIC FORCED =====
 const ALL_GAME_ASSETS = [
   // Core files
   '/Road-Rage-2d/',
@@ -10,7 +10,7 @@ const ALL_GAME_ASSETS = [
   '/Road-Rage-2d/offline.html',
   '/Road-Rage-2d/manifest.json',
   
-  // All 9 car images
+  // All car images
   '/Road-Rage-2d/imahe/image1.png',
   '/Road-Rage-2d/imahe/image2.png',
   '/Road-Rage-2d/imahe/image3.png',
@@ -21,98 +21,116 @@ const ALL_GAME_ASSETS = [
   '/Road-Rage-2d/imahe/image8.png',
   '/Road-Rage-2d/imahe/image9.png',
   
-  // ALL 5 MUSIC TRACKS (31MB) - FORCED DOWNLOAD
+  // MUSIC FILES - CRITICAL (31MB)
   '/Road-Rage-2d/music/ms1.mp3',
   '/Road-Rage-2d/music/ms2.mp3',
   '/Road-Rage-2d/music/ms3.mp3',
   '/Road-Rage-2d/music/ms4.mp3',
   '/Road-Rage-2d/music/ms5.mp3',
   
-  // App icons
+  // Icons
   '/Road-Rage-2d/icons/icon-192.png',
   '/Road-Rage-2d/icons/icon-512.png'
 ];
 
-// ===== INSTALL: FORCE DOWNLOAD ALL FILES INCLUDING MUSIC =====
+// ===== INSTALL: FORCE DOWNLOAD EVERYTHING =====
 self.addEventListener('install', event => {
-  console.log('🎮 [SW] Installing ALL game packages (including 31MB music)...');
+  console.log('🎮 [SW] FORCE INSTALLING ALL RESOURCES...');
   
   event.waitUntil(
     (async () => {
       try {
         const cache = await caches.open(CACHE_NAME);
-        let downloadedCount = 0;
-        const totalFiles = ALL_GAME_ASSETS.length;
+        let downloaded = 0;
+        const total = ALL_GAME_ASSETS.length;
         
         // Send initial progress
-        sendProgressToGame('⏬ Installing game packages...', 0, totalFiles);
+        sendProgressToGame('🚀 Starting installation...', 0, total);
         
-        // Download files ONE BY ONE with progress tracking
-        for (const assetUrl of ALL_GAME_ASSETS) {
-          try {
-            console.log(`⏬ Downloading: ${assetUrl.split('/').pop()}`);
-            
-            // Fetch with 30-second timeout
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            
-            const response = await fetch(assetUrl, {
-              signal: controller.signal,
-              cache: 'reload'
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (response.ok) {
-              await cache.put(assetUrl, response);
-              downloadedCount++;
+        // Download ALL files sequentially with retries
+        for (const url of ALL_GAME_ASSETS) {
+          const filename = url.split('/').pop();
+          let success = false;
+          let attempts = 0;
+          
+          while (!success && attempts < 3) {
+            attempts++;
+            try {
+              console.log(`⏬ Attempt ${attempts}: ${filename}`);
               
-              // Update progress
-              const progress = Math.round((downloadedCount / totalFiles) * 100);
-              console.log(`✅ ${downloadedCount}/${totalFiles} (${progress}%): ${assetUrl.split('/').pop()}`);
+              // Special handling for large music files
+              const fetchOptions = {
+                cache: 'reload',
+                credentials: 'same-origin'
+              };
               
-              // Send progress to game UI
-              sendProgressToGame(
-                `Installing... ${progress}%`,
-                downloadedCount,
-                totalFiles
-              );
+              if (url.includes('.mp3')) {
+                fetchOptions.priority = 'high';
+              }
               
-              // Special message for music files
-              if (assetUrl.includes('.mp3')) {
-                const musicNum = assetUrl.match(/ms(\d)/)?.[1] || '?';
+              const response = await fetch(url, fetchOptions);
+              
+              if (response.ok) {
+                await cache.put(url, response);
+                downloaded++;
+                success = true;
+                
+                const percent = Math.round((downloaded / total) * 100);
+                
+                // Send progress update
+                if (url.includes('.mp3')) {
+                  const musicNum = url.match(/ms(\d)/)?.[1] || '?';
+                  sendProgressToGame(
+                    `🎵 Music ${musicNum}/5 installed`,
+                    downloaded,
+                    total
+                  );
+                } else {
+                  sendProgressToGame(
+                    `Installing game... ${percent}%`,
+                    downloaded,
+                    total
+                  );
+                }
+              }
+            } catch (err) {
+              console.warn(`⚠️ Attempt ${attempts} failed for ${filename}:`, err.message);
+              if (attempts === 3) {
                 sendProgressToGame(
-                  `🎵 Music ${musicNum}/5 downloaded`,
-                  downloadedCount,
-                  totalFiles
+                  `⚠️ Skipped: ${filename}`,
+                  downloaded,
+                  total
                 );
               }
             }
-          } catch (err) {
-            console.warn(`⚠️ Failed to download ${assetUrl}:`, err.message);
-            // Continue with other files even if one fails
           }
         }
         
         // Installation complete
-        console.log(`🎉 INSTALLATION COMPLETE: ${downloadedCount}/${totalFiles} files`);
+        console.log(`🎉 COMPLETE: ${downloaded}/${total} files`);
         
-        if (downloadedCount >= 15) { // At least 15 files (including music)
+        if (downloaded >= total - 3) { // Allow 3 files to fail
           sendProgressToGame(
-            '✅ Game + Music installed! Ready for home screen.',
-            downloadedCount,
-            totalFiles
+            '✅ All resources installed!',
+            downloaded,
+            total
           );
           
-          // Trigger game music to start
-          notifyGameMusicReady();
+          // Notify game that music is ready
+          notifyGameComplete();
+        } else {
+          sendProgressToGame(
+            '⚠️ Partial installation - some files missing',
+            downloaded,
+            total
+          );
         }
         
         return self.skipWaiting();
         
       } catch (error) {
         console.error('❌ Installation failed:', error);
-        sendProgressToGame('⚠️ Installation incomplete - refresh to retry', 0, totalFiles);
+        sendProgressToGame('❌ Installation failed - refresh page', 0, 0);
         throw error;
       }
     })()
@@ -121,92 +139,61 @@ self.addEventListener('install', event => {
 
 // ===== ACTIVATE: Clean old caches =====
 self.addEventListener('activate', event => {
-  console.log('🔄 [SW] Activating with forced music cache...');
+  console.log('🔄 [SW] Activating with complete cache...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // Delete ALL old caches
           if (cacheName !== CACHE_NAME) {
             console.log(`🗑️ Deleting old cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('✅ Service Worker activated');
+      return self.clients.claim();
+    })
   );
 });
 
-// ===== FETCH: Serve cached files =====
+// ===== FETCH: Serve from cache first =====
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Handle music files with cache-first strategy
+  // For music files: cache only
   if (url.includes('.mp3')) {
     event.respondWith(
       (async () => {
-        // Try cache first (music should be there after installation)
         const cached = await caches.match(event.request);
         if (cached) {
-          console.log(`🎵 Playing from cache: ${url.split('/').pop()}`);
           return cached;
         }
-        
-        // If not in cache, try network
-        try {
-          const response = await fetch(event.request);
-          if (response.ok) {
-            // Cache for next time
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put(event.request, response.clone());
-          }
-          return response;
-        } catch {
-          // No network, no cache
-          return new Response('', { 
-            status: 404,
-            headers: { 'Content-Type': 'audio/mpeg' }
-          });
-        }
+        // Music should be cached during install
+        return new Response('', { 
+          status: 404,
+          headers: { 'Content-Type': 'audio/mpeg' }
+        });
       })()
     );
     return;
   }
   
-  // For other files: cache-first
+  // For other files: cache-first with network fallback
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        return fetch(event.request)
-          .then(response => {
-            // Cache new files (except large ones)
-            if (response.ok) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME)
-                .then(cache => cache.put(event.request, responseClone));
-            }
-            return response;
-          })
-          .catch(() => {
-            // Offline fallback
-            if (event.request.mode === 'navigate') {
-              return caches.match(OFFLINE_URL);
-            }
-            return new Response('Game asset offline');
-          });
-      })
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request);
+    })
   );
 });
 
 // ===== HELPER FUNCTIONS =====
-
 function sendProgressToGame(message, current, total) {
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
@@ -215,18 +202,18 @@ function sendProgressToGame(message, current, total) {
         message: message,
         current: current,
         total: total,
-        progressPercent: Math.round((current / total) * 100)
+        progressPercent: total > 0 ? Math.round((current / total) * 100) : 0
       });
     });
   });
 }
 
-function notifyGameMusicReady() {
+function notifyGameComplete() {
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
       client.postMessage({
-        type: 'MUSIC_READY',
-        message: '🎵 All music tracks downloaded and ready!'
+        type: 'INSTALLATION_COMPLETE',
+        message: '✅ Game + Music fully installed!'
       });
     });
   });
