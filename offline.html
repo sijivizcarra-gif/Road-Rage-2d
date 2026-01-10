@@ -26,6 +26,19 @@
     </style>
 </head>
 <body>
+    <button onclick="if('caches' in window) { 
+  caches.open('road-rage-complete-v1.0').then(c => {
+    c.keys().then(keys => {
+      const audioFiles = keys.filter(k => k.url.includes('.m4a'));
+      const images = keys.filter(k => k.url.includes('.png'));
+      alert(`🎮 COMPLETE OFFLINE PACKAGE\n\n` +
+            `✅ ${images.length} car images\n` +
+            `✅ ${audioFiles.length}/5 music tracks\n` +
+            `✅ Total: ${keys.length} files cached\n\n` +
+            `Game is ${audioFiles.length >= 5 ? 'FULLY' : 'PARTIALLY'} ready offline`);
+    });
+  });
+}">Check Complete Package</button>
     <div class="box">
         <h1>⚠️ Road Rage 2D is Offline</h1>
         <p>The game is cached on your device!</p>
