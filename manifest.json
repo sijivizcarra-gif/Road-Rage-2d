@@ -1,6 +1,6 @@
 {
   "name": "Road Rage 2D",
-  "short_name": "Road Rage",
+  "short_name": "RoadRage2D",
   "description": "Master the highway. Avoid traffic. Use power-ups to survive.",
   "start_url": "/Road-Rage-2d/",
   "display": "standalone",
@@ -20,5 +20,6 @@
       "type": "image/png"
     }
   ],
-  "categories": ["games", "racing"]
+  "categories": ["games", "racing"],
+  "prefer_related_applications": false
 }
