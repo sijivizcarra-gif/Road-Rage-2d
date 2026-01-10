@@ -1,4 +1,5 @@
 {
+  "id": "/Road-Rage-2d/",
   "name": "Road Rage 2D",
   "short_name": "Road Rage",
   "description": "Master the highway. Avoid traffic. Use power-ups to survive.",
@@ -18,6 +19,29 @@
       "src": "/Road-Rage-2d/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/Road-Rage-2d/screenshots/screenshot-1.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "High-speed gameplay on the highway"
+    },
+    {
+      "src": "/Road-Rage-2d/screenshots/screenshot-2.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Car selection menu with vehicle stats"
+    },
+    {
+      "src": "/Road-Rage-2d/screenshots/screenshot-3.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Power-up activation with shield effect"
     }
   ],
   "categories": ["games", "racing"]
