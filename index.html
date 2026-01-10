@@ -5,466 +5,531 @@
   <title>Road Rage 2D - Pro Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <!-- PWA CONFIGURATION -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#050505">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#050505">
 
-<!-- iOS Support -->
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- iOS Support -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
+    :root {    
+      --neon-yellow: #faff00;    
+      --neon-blue: #00f2ff;    
+      --neon-red: #ff3131;    
+      --bg-dark: #050505;    
+    }    
+    html, body {    
+      margin: 0; padding: 0; width: 100%; height: 100%;    
+      background: var(--bg-dark);    
+      overflow: hidden; touch-action: none;    
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;    
+    }    
+    body { display: flex; justify-content: center; align-items: center; }  
     
-        :root {    
-            --neon-yellow: #faff00;    
-            --neon-blue: #00f2ff;    
-            --neon-red: #ff3131;    
-            --bg-dark: #050505;    
-        }    
-        html, body {    
-            margin: 0; padding: 0; width: 100%; height: 100%;    
-            background: var(--bg-dark);    
-            overflow: hidden; touch-action: none;    
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;    
-        }    
-        body { display: flex; justify-content: center; align-items: center; }  canvas {    
-        border-left: 4px solid #222;    
-        border-right: 4px solid #222;    
-        box-shadow: 0 0 50px rgba(0,0,0,1);    
-        background: #111;    
-    }    /* Modern HUD */    
-  #hud {    
-    position: absolute; top: 15px; left: 15px; z-index: 30;    
-    color: white; pointer-events: none;    
-  }    
-  .stat-box { margin-bottom: 8px; }    
-  #bestText { 
-    font-size: 11px; 
-    text-transform: uppercase; 
-    letter-spacing: 1px; 
-    opacity: 0.7; 
-    margin-bottom: 2px;
-  }    
-  #scoreText { 
-    font-size: 28px; 
-    font-weight: 900; 
-    color: var(--neon-yellow); 
-    text-shadow: 0 0 8px rgba(250,255,0,0.5);
-    line-height: 1;
-  }    
+    canvas {    
+      border-left: 4px solid #222;    
+      border-right: 4px solid #222;    
+      box-shadow: 0 0 50px rgba(0,0,0,1);    
+      background: #111;    
+    }    
+  
+    /* Modern HUD */    
+    #hud {    
+      position: absolute; top: 15px; left: 15px; z-index: 30;    
+      color: white; pointer-events: none;    
+    }    
+    .stat-box { margin-bottom: 8px; }    
+    #bestText { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      opacity: 0.7; 
+      margin-bottom: 2px;
+    }    
+    #scoreText { 
+      font-size: 28px; 
+      font-weight: 900; 
+      color: var(--neon-yellow); 
+      text-shadow: 0 0 8px rgba(250,255,0,0.5);
+      line-height: 1;
+    }    
     
-  #powerContainer { margin-top: 10px; }    
-  #powerBar {    
-    width: 120px; 
-    height: 4px; 
-    background: rgba(255,255,255,0.1);    
-    border-radius: 2px; 
-    overflow: hidden; 
-    border: 1px solid rgba(255,255,255,0.15);    
-  }    
-  #powerFill { 
-    height: 100%; 
-    width: 0%; 
-    background: var(--neon-blue); 
-    box-shadow: 0 0 6px var(--neon-blue); 
-    transition: width 0.1s; 
-  }    
+    #powerContainer { margin-top: 10px; }    
+    #powerBar {    
+      width: 120px; 
+      height: 4px; 
+      background: rgba(255,255,255,0.1);    
+      border-radius: 2px; 
+      overflow: hidden; 
+      border: 1px solid rgba(255,255,255,0.15);    
+    }    
+    #powerFill { 
+      height: 100%; 
+      width: 0%; 
+      background: var(--neon-blue); 
+      box-shadow: 0 0 6px var(--neon-blue); 
+      transition: width 0.1s; 
+    }    
 
-  #powerText {    
-    font-size: 11px; 
-    color: var(--neon-blue); 
-    margin-top: 4px; 
-    text-transform: uppercase; 
-    letter-spacing: 1px;    
-  }    
+    #powerText {    
+      font-size: 11px; 
+      color: var(--neon-blue); 
+      margin-top: 4px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px;    
+    }    
 
-  /* Professional Overlays */    
-  .overlay {    
-    position: absolute; 
-    width: 350px;
-    /* Idagdag ang mga ito para sa alignment */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Ito ang sikreto sa pag-center */
-    
-    background: rgba(10, 10, 10, 0.85);    
-    backdrop-filter: blur(10px);    
-    border: 1px solid rgba(255,255,255,0.1);    
-    border-top: 5px solid var(--neon-yellow);    
-    color: white; 
-    padding: 40px; 
-    text-align: center; 
-    z-index: 100;    
-    border-radius: 4px; 
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);    
-    
-    /* Siguraduhing flex para pantay-pantay ang loob */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+    /* Professional Overlays */    
+    .overlay {    
+      position: absolute; 
+      width: 350px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 10, 10, 0.85);    
+      backdrop-filter: blur(10px);    
+      border: 1px solid rgba(255,255,255,0.1);    
+      border-top: 5px solid var(--neon-yellow);    
+      color: white; 
+      padding: 40px; 
+      text-align: center; 
+      z-index: 100;    
+      border-radius: 4px; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);    
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-  h1 { font-size: 2.5rem; margin: 0 0 20px 0; letter-spacing: -1px; font-style: italic; }    
-  p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }    
+    h1 { font-size: 2.5rem; margin: 0 0 20px 0; letter-spacing: -1px; font-style: italic; }    
+    p { line-height: 1.6; color: #aaa; margin-bottom: 30px; }    
 
-  .btn-pro {    
-    background: var(--neon-yellow); color: black; border: none;    
-    padding: 18px; font-size: 16px; font-weight: bold;    
-    text-transform: uppercase; letter-spacing: 2px; cursor: pointer;    
-    width: 100%; transition: 0.3s; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);    
-  }    
-  .btn-pro:hover { transform: scale(1.05); background: white; }    
+    .btn-pro {    
+      background: var(--neon-yellow); color: black; border: none;    
+      padding: 18px; font-size: 16px; font-weight: bold;    
+      text-transform: uppercase; letter-spacing: 2px; cursor: pointer;    
+      width: 100%; transition: 0.3s; clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);    
+    }    
+    .btn-pro:hover { transform: scale(1.05); background: white; }    
 
-  #gameOverBox { 
-    display: none; 
-    flex-direction: column;
-    border-top-color: var(--neon-red); 
-  }
+    #gameOverBox { 
+      display: none; 
+      flex-direction: column;
+      border-top-color: var(--neon-red); 
+    }
     
 
-  .blink { animation: blink-anim 1s infinite; }    
-  @keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .final-score-label {
-    text-transform: uppercase;
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: #888;
-    margin-top: 20px;
-  }
+    .blink { animation: blink-anim 1s infinite; }    
+    @keyframes blink-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    
+    .final-score-label {
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #888;
+      margin-top: 20px;
+    }
 
-  .final-score-val {
-    font-size: 48px;
-    font-weight: 900;
-    color: var(--neon-yellow);
-    margin-bottom: 30px;
-    text-shadow: 0 0 20px rgba(250,255,0,0.3);
-  }
+    .final-score-val {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--neon-yellow);
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(250,255,0,0.3);
+    }
 
-  /* Pause Button Styles */
-  #pauseBtn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    z-index: 30;
-    background: transparent;
-    border: none;
-    color: var(--neon-blue);
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    font-size: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    filter: drop-shadow(0 0 6px rgba(0, 242, 255, 0.5));
-  }
+    /* Pause Button Styles */
+    #pauseBtn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 30;
+      background: transparent;
+      border: none;
+      color: var(--neon-blue);
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      filter: drop-shadow(0 0 6px rgba(0, 242, 255, 0.5));
+    }
 
-  #pauseBtn:hover {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.8));
-  }
+    #pauseBtn:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.8));
+    }
 
-  #pauseBtn:active {
-    transform: scale(0.95);
-  }
+    #pauseBtn:active {
+      transform: scale(0.95);
+    }
 
-  #pauseBtn svg {
-    width: 100%;
-    height: 100%;
-  }
+    #pauseBtn svg {
+      width: 100%;
+      height: 100%;
+    }
 
-  .pause-icon {
-    display: block;
-  }
+    .pause-icon {
+      display: block;
+    }
 
-  .play-icon {
-    display: none;
-  }
+    .play-icon {
+      display: none;
+    }
 
-  #pauseBtn.paused .pause-icon {
-    display: none;
-  }
+    #pauseBtn.paused .pause-icon {
+      display: none;
+    }
 
-  #pauseBtn.paused .play-icon {
-    display: block;
-  }
+    #pauseBtn.paused .play-icon {
+      display: block;
+    }
 
-  /* Pause Menu Overlay */
-  #pauseMenu {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(5, 5, 5, 0.85);
-    backdrop-filter: blur(10px);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-  }
+    /* Pause Menu Overlay */
+    #pauseMenu {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 5, 0.85);
+      backdrop-filter: blur(10px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
 
-  .pause-title {
-    font-size: 3.5rem;
-    font-weight: 900;
-    color: var(--neon-blue);
-    margin-bottom: 40px;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    text-shadow: 0 0 30px var(--neon-blue);
-  }
+    .pause-title {
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: var(--neon-blue);
+      margin-bottom: 40px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 30px var(--neon-blue);
+    }
 
-  /* Countdown Overlay */
-  #countdownOverlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(5, 5, 5, 0.9);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 60;
-  }
+    /* Countdown Overlay */
+    #countdownOverlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 5, 0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+    }
 
-  .countdown-number {
-    font-size: 10rem;
-    font-weight: 900;
-    color: var(--neon-yellow);
-    text-shadow: 0 0 40px var(--neon-yellow);
-    animation: pulse 1s infinite;
-  }
+    .countdown-number {
+      font-size: 10rem;
+      font-weight: 900;
+      color: var(--neon-yellow);
+      text-shadow: 0 0 40px var(--neon-yellow);
+      animation: pulse 1s infinite;
+    }
 
-  @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2); opacity: 0.8; }
-  }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
 
-  .countdown-message {
-    font-size: 1.5rem;
-    color: white;
-    margin-top: 30px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    opacity: 0.8;
-  }
+    .countdown-message {
+      font-size: 1.5rem;
+      color: white;
+      margin-top: 30px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
 
-  /* Background Pause Indicator */
-  .bg-pause-indicator {
-    position: absolute;
-    top: 60px;
-    right: 15px;
-    background: rgba(255, 100, 100, 0.2);
-    color: var(--neon-red);
-    padding: 4px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: none;
-    z-index: 31;
-    border: 1px solid rgba(255, 100, 100, 0.3);
-  }
+    /* Background Pause Indicator */
+    .bg-pause-indicator {
+      position: absolute;
+      top: 60px;
+      right: 15px;
+      background: rgba(255, 100, 100, 0.2);
+      color: var(--neon-red);
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: none;
+      z-index: 31;
+      border: 1px solid rgba(255, 100, 100, 0.3);
+    }
 
-  /* Simple Top Messages */
-  .top-message {
-    position: absolute;
-    top: 150px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 16px;
-    font-weight: 500;
-    text-align: center;
-    color: white;
-    z-index: 25;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 1 ease-in-out;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    max-width: 80%;
-    line-height: 1.4;
-  }
+    /* Simple Top Messages */
+    .top-message {
+      position: absolute;
+      top: 150px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      color: white;
+      z-index: 25;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      max-width: 80%;
+      line-height: 1.4;
+    }
 
-  /* Car Selection Styles */
-  #carSelectBox {
-    position: absolute;
-    width: 420px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(10, 10, 10, 0.85);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-top: 5px solid var(--neon-yellow);
-    color: white;
-    padding: 30px;
-    text-align: center;
-    z-index: 100;
-    border-radius: 4px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+    /* Car Selection Styles */
+    #carSelectBox {
+      position: absolute;
+      width: 420px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-top: 5px solid var(--neon-yellow);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      z-index: 100;
+      border-radius: 4px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
 
-  .car-select-title {
-    font-size: 2rem;
-    margin: 0 0 25px 0;
-    letter-spacing: -1px;
-    font-style: italic;
-    color: var(--neon-yellow);
-    text-transform: uppercase;
-  }
+    .car-select-title {
+      font-size: 2rem;
+      margin: 0 0 25px 0;
+      letter-spacing: -1px;
+      font-style: italic;
+      color: var(--neon-yellow);
+      text-transform: uppercase;
+    }
 
-  .car-select-subtitle {
-    font-size: 14px;
-    color: #aaa;
-    margin-bottom: 30px;
-    line-height: 1.5;
-  }
+    .car-select-subtitle {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
 
-  .car-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 30px;
-    width: 100%;
-  }
+    .car-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
 
-  .car-option {
-    background: rgba(30, 30, 30, 0.7);
-    border: 2px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 140px;
-  }
+    .car-option {
+      background: rgba(30, 30, 30, 0.7);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+    }
 
-  .car-option:hover {
-    background: rgba(50, 50, 50, 0.7);
-    transform: translateY(-5px);
-  }
+    .car-option:hover {
+      background: rgba(50, 50, 50, 0.7);
+      transform: translateY(-5px);
+    }
 
-  .car-option.selected {
-    border-color: var(--neon-yellow);
-    background: rgba(250, 255, 0, 0.1);
-    box-shadow: 0 0 20px rgba(250, 255, 0, 0.3);
-  }
+    .car-option.selected {
+      border-color: var(--neon-yellow);
+      background: rgba(250, 255, 0, 0.1);
+      box-shadow: 0 0 20px rgba(250, 255, 0, 0.3);
+    }
 
-  .car-option.locked {
-    opacity: 0.5;
-    cursor: not-allowed;
-    position: relative;
-  }
+    .car-option.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+      position: relative;
+    }
 
-  .car-option.locked::after {
-    content: "🔒";
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 16px;
-  }
+    .car-option.locked::after {
+      content: "🔒";
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 16px;
+    }
 
-  .car-preview {
-    width: 80px;
-    height: 50px;
-    object-fit: contain;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
-  }
+    .car-preview {
+      width: 80px;
+      height: 50px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+    }
 
-  .car-name {
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+    .car-name {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-  .car-stats {
-    font-size: 10px;
-    color: #aaa;
-    display: flex;
-    gap: 8px;
-    margin-top: 5px;
-  }
+    .car-stats {
+      font-size: 10px;
+      color: #aaa;
+      display: flex;
+      gap: 8px;
+      margin-top: 5px;
+    }
 
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
 
-  .car-unlock-req {
-    font-size: 9px;
-    color: var(--neon-yellow);
-    margin-top: 8px;
-    font-style: italic;
-  }
+    .car-unlock-req {
+      font-size: 9px;
+      color: var(--neon-yellow);
+      margin-top: 8px;
+      font-style: italic;
+    }
 
-  .car-nav {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-  }
+    .car-nav {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
 
-  .nav-btn {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-  }
+    .nav-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
 
-  .nav-btn:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.1);
-  }
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.1);
+    }
 
-  .car-preview-container {
-    width: 200px;
-    height: 120px;
-    background: rgba(20, 20, 20, 0.5);
-    border-radius: 10px;
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid rgba(255,255,255,0.1);
-  }
+    .car-preview-container {
+      width: 200px;
+      height: 120px;
+      background: rgba(20, 20, 20, 0.5);
+      border-radius: 10px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
 
-  .selected-car-preview {
-    width: 160px;
-    height: 100px;
-    object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
-  }
+    .selected-car-preview {
+      width: 160px;
+      height: 100px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+    }
 
-  /* Simplified car stats */
-  .car-simple-stats {
-    font-size: 11px;
-    color: #aaa;
-    margin-top: 5px;
-    text-align: center;
-  }
+    /* Simplified car stats */
+    .car-simple-stats {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 5px;
+      text-align: center;
+    }
+
+    /* Installation Progress Indicator */
+    #installProgress {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      z-index: 1000;
+      display: none;
+      text-align: center;
+      border: 2px solid var(--neon-yellow);
+      min-width: 300px;
+    }
+    
+    #installProgress h2 {
+      color: var(--neon-yellow);
+      margin-top: 0;
+    }
+    
+    .progress-container {
+      margin: 20px 0;
+    }
+    
+    .progress-bar-bg {
+      background: #333;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--neon-blue);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #aaa;
+    }
+    
+    .asset-status {
+      font-size: 12px;
+      color: #888;
+      margin-top: 15px;
+    }
 
   </style>
 </head>
 <body>
-    <button id="installBtn" style="
+  <!-- Installation Progress Overlay -->
+  <div id="installProgress">
+    <h2>📦 Installing Game</h2>
+    <div class="progress-container">
+      <div class="progress-bar-bg">
+        <div id="progressBar" class="progress-bar-fill"></div>
+      </div>
+      <div id="progressText" class="progress-text">Downloading game assets...</div>
+    </div>
+    <div id="assetStatus" class="asset-status">Preparing offline content...</div>
+  </div>
+
+  <!-- Install Button -->
+  <button id="installBtn" style="
     display: none;
     position: absolute;
     bottom: 20px;
@@ -477,7 +542,8 @@
     font-weight: bold;
     cursor: pointer;
     z-index: 1000;
-" onclick="installGame()">📲 Install Game</button>
+  " onclick="installGame()">📲 INSTALL (Includes Full Music Pack)</button>
+  
   <div id="hud">
     <div class="stat-box">
       <div id="bestText">
@@ -541,8 +607,6 @@
       <!-- Car options will be dynamically generated here -->
     </div>
     
-    <!-- Removed complex stats display -->
-    
     <div class="car-nav">
       <button class="nav-btn" onclick="prevCarPage()">❮</button>
       <button class="btn-pro" onclick="confirmCarSelection()" style="width: 200px;">SELECT & PLAY</button>
@@ -553,6 +617,8 @@
   </div>
   
   <canvas id="game" width="500" height="800"></canvas>
+  
+  <!-- Start Menu -->
   <div id="startBox" class="overlay">
     <h1>ROAD<br>
     <span style="color:var(--neon-yellow)">RAGE 2D</span></h1>
@@ -561,6 +627,8 @@
     <button class="btn-pro" onclick="showCarSelection()">SELECT CAR</button>
     <button class="btn-pro" style="margin-top: 15px; background: rgba(255,255,255,0.05);" onclick="quickStart()">QUICK START</button>
   </div>
+  
+  <!-- Game Over Screen -->
   <div id="gameOverBox" class="overlay">
     <h1 style="color: var(--neon-red)">WASTED</h1>
     <div class="final-score-label">
@@ -572,78 +640,14 @@
     <button class="btn-pro blink" onclick="showCarSelection()">PLAY AGAIN</button>
     <button class="btn-pro" style="margin-top: 15px; background: rgba(255,255,255,0.05);" onclick="backToMenuFromGameOver()">MAIN MENU</button>
   </div>
+  
   <script>
-    
+    // ===== GAME VARIABLES =====
     const canvas = document.getElementById("game");
-    function preloadImages(srcArray, callback) {
-    let loaded = 0;
-    const images = [];
-    srcArray.forEach(src => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-            loaded++;
-            if (loaded === srcArray.length) callback(images);
-        };
-        images.push(img);
-    });
-}
-const imageSources = [
-    "imahe/image2.png", 
-    "imahe/image1.png",
-    "imahe/image3.png",
-    "imahe/image4.png",
-    "imahe/image5.png",
-    "imahe/image6.png",
-    "imahe/image7.png",
-    "imahe/image8.png",
-    "imahe/image9.png"
-];
-let playerImg, enemyImgs;
-
-preloadImages(imageSources, (loadedImages) => {
-    playerImg = loadedImages[0];           // first image = player
-    enemyImgs = loadedImages.slice(1);     // rest = enemies
-    
-    // Now safe to start the game
-    initGame(); 
-    loop();  // start the render loop
-});
-    let inputDir = 0; // -1 left, 1 right, 0 idle
-
-  // ===== KEYBOARD =====
-  window.addEventListener("keydown", e => {
-    if (e.key === "ArrowLeft" || e.key === "a") inputDir = -1;
-    if (e.key === "ArrowRight" || e.key === "d") inputDir = 1;
-    if (e.key === "Escape" || e.key === "p") togglePause();
-  });
-
-  window.addEventListener("keyup", e => {
-    if (
-        e.key === "ArrowLeft" || e.key === "a" ||
-        e.key === "ArrowRight" || e.key === "d"
-    ) inputDir = 0;
-  });
-
-  // ===== TOUCH =====
-  canvas.addEventListener("touchstart", e => {
-    e.preventDefault();
-    const x = e.touches[0].clientX;
-    inputDir = x < window.innerWidth / 2 ? -1 : 1;
-  }, { passive: false });
-
-  canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
-
-  // ===== MOUSE =====
-  canvas.addEventListener("mousedown", e => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    inputDir = x < canvas.width / 2 ? -1 : 1;
-  });
-
-  window.addEventListener("mouseup", () => inputDir = 0);    
     const ctx = canvas.getContext("2d");
     ctx.imageSmoothingEnabled = true;    
+    
+    // UI Elements
     const scoreText = document.getElementById("scoreText");    
     const bestText = document.getElementById("bestText");    
     const powerFill = document.getElementById("powerFill");    
@@ -660,51 +664,279 @@ preloadImages(imageSources, (loadedImages) => {
     const carSelectBox = document.getElementById("carSelectBox");
     const carGrid = document.getElementById("carGrid");
     const selectedCarPreview = document.getElementById("selectedCarPreview");
-    const carStats = document.getElementById("carStats");
-    
-    let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
-  bestText.textContent = "Top Record: " + highScore;
+    const installProgress = document.getElementById("installProgress");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const assetStatus = document.getElementById("assetStatus");
+    const installBtn = document.getElementById("installBtn");
 
-    // ===== LOAD CAR IMAGES =====
+    // Game Constants
     const W = 500, H = 800;    
     const LANES = [85, 165, 245, 325, 405];    
     const COLORS = ["#FF3131", "#00F2FF", "#FFCA3A", "#8AC926", "#6A4C93"];    
-        
-      let car, enemies, roadLines, sideMarkers, speed, distance, score;
+    
+    // Game State Variables
+    let car, enemies, roadLines, sideMarkers, speed, distance, score;
     let gameStarted = false, gameOver = false, moveDir = 0, spawnTimer = 0;    
     let powerState = null, powerTimer = 0, powerCooldown = 0, nextPowerScore = 500;    
     let scoreMultiplier = 1, powerMsg = "", powerMsgTimer = 0;      
-    let baseDistance = 0; // Para sa tamang scoring ng 2X
-    let slowMultiplier = 1; // Para sa SLOW power
-    let originalSpeed = 4; // Store original speed for SLOW power
-    let scoreDuring2X = 0; // NEW: Track score during 2X to prevent drop when power ends
-    let gamePaused = false; // Pause state
-    let isCountdown = false; // Countdown state
-    let autoPaused = false; // Track if paused automatically
-    let messageTimer = 0; // Timer for messages
-    let lastMessageTime = 0; // Track when last message showed
-    let selectedCarIndex = 0; // Currently selected car index
-    let currentCarPage = 0; // Current car selection page
-    let unlockedCars = [0]; // Array of unlocked car indices (start with first car)
+    let baseDistance = 0;
+    let slowMultiplier = 1;
+    let originalSpeed = 4;
+    let scoreDuring2X = 0;
+    let gamePaused = false;
+    let isCountdown = false;
+    let autoPaused = false;
+    let messageTimer = 0;
+    let lastMessageTime = 0;
+    let selectedCarIndex = 0;
+    let currentCarPage = 0;
+    let unlockedCars = [0];
+    let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
+    
+    // Audio System Variables
+    let bgAudios = [];
+    let currentBG = null;
+    let lastIndex = -1;
+    let musicEnabled = true;
+    let audioFullyCached = false;
+    let cacheCheckInterval;
 
-    // Simple motivational messages (paminsan-minsan lang)
-    const simpleMessages = [
-      "Miss mo na ba s'ya?",
-      "What if mahal ka pa n'ya?",
-      "I miss yoy",
-      "Okay lang 'yan",
-      "Kaya pa 'yan late game",
-      "Balik ka na",
-      "Don't give up!",
-      "Sana ako na lang",
-      "Mahal pa kita",
-      "Akala mo mahal ka n'ya?",
-      "Sana ikaw na lang no?",
-      "Masarap ba na parang wala ka lang sa kanya?",
-      "Kaya pa yan late game"
+    // ===== OFFLINE AUDIO SYSTEM =====
+    const bgTracks = [
+      "music/ms1.m4a",
+      "music/ms2.m4a",
+      "music/ms3.m4a",
+      "music/ms4.m4a",
+      "music/ms5.m4a"
     ];
 
-    // Car database with stats and requirements
+    // Check if all audio files are cached
+    async function verifyAudioCache() {
+      if (!('caches' in window)) return false;
+      
+      try {
+        const cache = await caches.open('road-rage-complete-v1.0');
+        const keys = await cache.keys();
+        
+        const audioFiles = keys.filter(key => 
+          key.url.includes('.m4a') && 
+          key.url.includes('/Road-Rage-2d/music/')
+        );
+        
+        console.log(`🎵 Audio cache status: ${audioFiles.length}/5 files`);
+        
+        if (audioFiles.length >= 5) {
+          audioFullyCached = true;
+          return true;
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Cache check failed:', error);
+        return false;
+      }
+    }
+
+    // Preload all audio files
+    async function preloadAllAudio() {
+      console.log('🔊 Preloading all game audio...');
+      
+      for (const src of bgTracks) {
+        try {
+          await fetch(src, { cache: 'force-cache' });
+          console.log(`✅ Audio preloaded: ${src}`);
+        } catch (error) {
+          console.log(`⚠️ Could not preload: ${src}`, error);
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const cached = await verifyAudioCache();
+      
+      if (cached) {
+        console.log('🎉 All audio files are cached and ready for offline!');
+        showTopMessage('✅ Full music pack ready for offline!');
+        return true;
+      } else {
+        console.warn('⚠️ Some audio files may not work offline');
+        return false;
+      }
+    }
+
+    // Create offline-ready audio system
+    function createAudioSystem() {
+      console.log('🔧 Creating offline-ready audio system...');
+      
+      bgAudios = bgTracks.map((src, index) => {
+        const audio = new Audio();
+        audio.src = src;
+        audio.preload = "auto";
+        audio.load();
+        
+        audio.addEventListener('canplaythrough', () => {
+          console.log(`✅ Audio ${index + 1} ready: ${src}`);
+        });
+        
+        audio.addEventListener('error', (e) => {
+          console.error(`❌ Audio ${index + 1} error:`, src, e);
+          setTimeout(() => {
+            audio.load();
+          }, 1000);
+        });
+        
+        audio.volume = 0.5;
+        audio.setAttribute("playsinline", "");
+        
+        return audio;
+      });
+      
+      console.log('🎵 Audio system created');
+    }
+
+    // Play music with retry logic
+    function playRandomBG() {
+      if (!musicEnabled || bgAudios.length === 0) return;
+      
+      let index;
+      do {
+        index = Math.floor(Math.random() * bgAudios.length);
+      } while (index === lastIndex && bgAudios.length > 1);
+
+      lastIndex = index;
+
+      if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+      }
+
+      currentBG = bgAudios[index];
+      
+      const safePlay = (attempt = 1) => {
+        const playPromise = currentBG.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log(`▶️ Playing track ${index + 1}`);
+            })
+            .catch(error => {
+              console.log(`⏸️ Play failed (attempt ${attempt}):`, error.message);
+              
+              if (attempt < 3) {
+                setTimeout(() => safePlay(attempt + 1), 500);
+              } else {
+                console.log('🔇 Giving up on this track');
+                setTimeout(playRandomBG, 1000);
+              }
+            });
+        }
+      };
+
+      safePlay();
+      
+      currentBG.onended = () => {
+        if (musicEnabled) {
+          setTimeout(playRandomBG, 1000);
+        }
+      };
+    }
+
+    function stopMusic() {
+      musicEnabled = false;
+      if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+      }
+    }
+
+    // Cache status monitor
+    function startCacheMonitor() {
+      cacheCheckInterval = setInterval(() => {
+        if (gameStarted && !audioFullyCached) {
+          verifyAudioCache();
+        }
+      }, 10000);
+      
+      setTimeout(() => verifyAudioCache(), 2000);
+    }
+
+    function stopCacheMonitor() {
+      if (cacheCheckInterval) {
+        clearInterval(cacheCheckInterval);
+      }
+    }
+
+    // ===== IMAGE PRELOADING =====
+    function preloadImages(srcArray, callback) {
+      let loaded = 0;
+      const images = [];
+      srcArray.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          loaded++;
+          if (loaded === srcArray.length) callback(images);
+        };
+        images.push(img);
+      });
+    }
+
+    const imageSources = [
+      "imahe/image2.png", 
+      "imahe/image1.png",
+      "imahe/image3.png",
+      "imahe/image4.png",
+      "imahe/image5.png",
+      "imahe/image6.png",
+      "imahe/image7.png",
+      "imahe/image8.png",
+      "imahe/image9.png"
+    ];
+    
+    let playerImg, enemyImgs;
+
+    preloadImages(imageSources, (loadedImages) => {
+      playerImg = loadedImages[0];
+      enemyImgs = loadedImages.slice(1);
+      initGame();
+      loop();
+    });
+
+    // ===== INPUT HANDLING =====
+    let inputDir = 0;
+
+    window.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" || e.key === "a") inputDir = -1;
+      if (e.key === "ArrowRight" || e.key === "d") inputDir = 1;
+      if (e.key === "Escape" || e.key === "p") togglePause();
+    });
+
+    window.addEventListener("keyup", e => {
+      if (
+        e.key === "ArrowLeft" || e.key === "a" ||
+        e.key === "ArrowRight" || e.key === "d"
+      ) inputDir = 0;
+    });
+
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      const x = e.touches[0].clientX;
+      inputDir = x < window.innerWidth / 2 ? -1 : 1;
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
+
+    canvas.addEventListener("mousedown", e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      inputDir = x < canvas.width / 2 ? -1 : 1;
+    });
+
+    window.addEventListener("mouseup", () => inputDir = 0);
+
+    // ===== CAR DATABASE =====
     const carDatabase = [
       {
         name: "Street Racer",
@@ -798,922 +1030,853 @@ preloadImages(imageSources, (loadedImages) => {
       }
     ];
 
-    const bgTracks = [
-  "music/ms1.m4a",
-  "music/ms2.m4a",
-  "music/ms3.m4a",
-  "music/ms4.m4a",
-  "music/ms5.m4a"
-  ];
-
-  const bgAudios = bgTracks.map(src => {
-    const a = new Audio(src);
-    a.preload = "auto";
-    a.volume = 0.5;
-    a.setAttribute("playsinline", "");
-    return a;
-  });
-
-  let currentBG = null;
-  let lastIndex = -1;
-  let musicEnabled = true;
-
-  function playRandomBG() {
-    if (!musicEnabled) return;
-    
-    let index;
-    do {
-        index = Math.floor(Math.random() * bgAudios.length);
-    } while (index === lastIndex && bgAudios.length > 1);
-
-    lastIndex = index;
-
-    if (currentBG) {
-        currentBG.pause();
-        currentBG.currentTime = 0;
-    }
-
-    currentBG = bgAudios[index];
-    const playPromise = currentBG.play();
-    
-    if (playPromise !== undefined) {
-        playPromise.catch(e => {
-            console.log("Audio play failed:", e);
-            musicEnabled = false;
-        });
-    }
-
-    // auto-next kapag natapos
-    currentBG.onended = playRandomBG;
-  }
-   
-    
+    // ===== GAME INITIALIZATION =====
     function initGame() {    
-        car = { 
-    x: 230,
-    y: H - 150,
-    w: 50,
-    h: 90,
-    img: playerImg,
-    shield: false
-  };
-        enemies = []; 
-        roadLines = []; 
-        sideMarkers = [];    
-        speed = 4; 
-        distance = 0; 
-        score = 0; 
-        spawnTimer = 0;    
-        powerState = null; 
-        powerTimer = 0; 
-        powerCooldown = 0; 
-        nextPowerScore = 500;    
-        scoreMultiplier = 1; 
-        slowMultiplier = 1; 
-        originalSpeed = 4;
-        powerMsg = ""; 
-        powerMsgTimer = 0; 
-        gameOver = false;    
-        baseDistance = 0; // Reset base distance
-        scoreDuring2X = 0; // NEW: Reset
-        gamePaused = false; // Reset pause state
-        isCountdown = false; // Reset countdown
-        autoPaused = false; // Reset auto-pause
-        messageTimer = 0; // Reset message timer
-        lastMessageTime = 0; // Reset last message time
-        
-        // RESET POWER UI ELEMENTS
-        powerText.textContent = "";
-        powerFill.style.width = "0%";
-        powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+      car = { 
+        x: 230,
+        y: H - 150,
+        w: 50,
+        h: 90,
+        img: playerImg,
+        shield: false
+      };
+      
+      enemies = []; 
+      roadLines = []; 
+      sideMarkers = [];    
+      speed = 4; 
+      distance = 0; 
+      score = 0; 
+      spawnTimer = 0;    
+      powerState = null; 
+      powerTimer = 0; 
+      powerCooldown = 0; 
+      nextPowerScore = 500;    
+      scoreMultiplier = 1; 
+      slowMultiplier = 1; 
+      originalSpeed = 4;
+      powerMsg = ""; 
+      powerMsgTimer = 0; 
+      gameOver = false;    
+      baseDistance = 0;
+      scoreDuring2X = 0;
+      gamePaused = false;
+      isCountdown = false;
+      autoPaused = false;
+      messageTimer = 0;
+      lastMessageTime = 0;
+      
+      powerText.textContent = "";
+      powerFill.style.width = "0%";
+      powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
 
-        // Hide pause UI elements and reset button state
-        pauseMenu.style.display = "none";
-        countdownOverlay.style.display = "none";
-        bgPauseIndicator.style.display = "none";
-        pauseBtn.style.display = "none";
-        pauseBtn.classList.remove("paused"); // Reset to pause icon
-        
-        // Hide top message
-        topMessage.style.opacity = "0";
+      pauseMenu.style.display = "none";
+      countdownOverlay.style.display = "none";
+      bgPauseIndicator.style.display = "none";
+      pauseBtn.style.display = "none";
+      pauseBtn.classList.remove("paused");
+      
+      topMessage.style.opacity = "0";
 
-        for (let i = 0; i < H; i += 80) {    
-            roadLines.push({ y: i });    
-            sideMarkers.push({ y: i });    
-        }    
-    }    
-    
-  function startGame() {
-    startBox.style.display = "none";
-    gameOverBox.style.display = "none"; // ADDED: Hide game over box
-    carSelectBox.style.display = "none";
-    initGame();
-    gameStarted = true;
-    pauseBtn.style.display = "flex"; // Show pause button
-    pauseBtn.classList.remove("paused"); // Ensure it shows pause icon
-
-    // Try to play music, but don't fail if blocked
-    try {
-        playRandomBG();
-    } catch (e) {
-        console.log("Music play failed:", e);
-        musicEnabled = false;
+      for (let i = 0; i < H; i += 80) {    
+        roadLines.push({ y: i });    
+        sideMarkers.push({ y: i });    
+      }    
     }
-  }
-   
+
+    // ===== GAME START =====
+    function startGame() {
+      startBox.style.display = "none";
+      gameOverBox.style.display = "none";
+      carSelectBox.style.display = "none";
+      initGame();
+      gameStarted = true;
+      pauseBtn.style.display = "flex";
+      pauseBtn.classList.remove("paused");
+
+      if (bgAudios.length === 0) {
+        createAudioSystem();
+      }
+      
+      setTimeout(() => {
+        playRandomBG();
+        
+        verifyAudioCache().then(cached => {
+          if (!cached) {
+            showTopMessage('⚠️ Connect online once for full music pack');
+          }
+        });
+        
+        startCacheMonitor();
+      }, 800);
+    }
+
+    // ===== GAME LOGIC =====
     function hit(a, b) {
-        return a.x < b.x + b.w && 
-               a.x + a.w > b.x && 
-               a.y < b.y + b.h && 
-               a.y + a.h > b.y;
+      return a.x < b.x + b.w && 
+             a.x + a.w > b.x && 
+             a.y < b.y + b.h && 
+             a.y + a.h > b.y;
     }
 
     function spawnEnemies() {
-        let lanes = [...LANES];
-        let count = Math.random() < 0.75 ? 1 : 2; // 75% chance 1 car, 25% chance 2 cars
-        
-        for (let i = 0; i < count; i++) {
-            if (lanes.length === 0) break;
-            let idx = Math.floor(Math.random() * lanes.length);
-           enemies.push({ 
-    x: lanes.splice(idx, 1)[0],
-    y: -120,
-    w: 50,
-    h: 90,
-    img: enemyImgs[Math.floor(Math.random() * enemyImgs.length)]
-  });
-        }
+      let lanes = [...LANES];
+      let count = Math.random() < 0.75 ? 1 : 2;
+      
+      for (let i = 0; i < count; i++) {
+        if (lanes.length === 0) break;
+        let idx = Math.floor(Math.random() * lanes.length);
+        enemies.push({ 
+          x: lanes.splice(idx, 1)[0],
+          y: -120,
+          w: 50,
+          h: 90,
+          img: enemyImgs[Math.floor(Math.random() * enemyImgs.length)]
+        });
+      }
     }
 
-   function drawPlayer(c) {
-    ctx.save();
+    // ===== DRAWING FUNCTIONS =====
+    function drawPlayer(c) {
+      ctx.save();
+      ctx.shadowColor = "rgba(255,255,255,0.35)";
+      ctx.shadowBlur = 18;
 
-    // soft glow
-    ctx.shadowColor = "rgba(255,255,255,0.35)";
-    ctx.shadowBlur = 18;
-
-    if (c.img.complete) {
+      if (c.img.complete) {
         ctx.drawImage(c.img, c.x, c.y, c.w, c.h);
+      }
+
+      ctx.restore();
     }
 
-    ctx.restore();
-  }
+    function drawEnemy(e) {
+      ctx.save();
+      ctx.shadowColor = "rgba(255,255,255,0.25)";
+      ctx.shadowBlur = 14;
 
-
-  function drawEnemy(e) {
-    ctx.save();
-
-    ctx.shadowColor = "rgba(255,255,255,0.25)";
-    ctx.shadowBlur = 14;
-
-    if (e.img.complete) {
+      if (e.img.complete) {
         ctx.drawImage(e.img, e.x, e.y, e.w, e.h);
+      }
+
+      ctx.restore();
     }
 
-    ctx.restore();
-  }
-  
     function drawPowerEffects() {
-        if (!powerState) return;
+      if (!powerState) return;
 
-        // Shield power effect
-        if (powerState === "SHIELD") {
-            ctx.save();
-            ctx.strokeStyle = car.shield ? "rgba(0, 255, 255, 0.7)" : "rgba(255, 100, 100, 0.5)";
-            ctx.lineWidth = 4;
-            ctx.shadowColor = car.shield ? "#00ffff" : "#ff6464";
-            ctx.shadowBlur = car.shield ? 15 : 8;
-            ctx.strokeRect(car.x - 6, car.y - 6, car.w + 12, car.h + 12);
-            ctx.restore();
-        }
+      if (powerState === "SHIELD") {
+        ctx.save();
+        ctx.strokeStyle = car.shield ? "rgba(0, 255, 255, 0.7)" : "rgba(255, 100, 100, 0.5)";
+        ctx.lineWidth = 4;
+        ctx.shadowColor = car.shield ? "#00ffff" : "#ff6464";
+        ctx.shadowBlur = car.shield ? 15 : 8;
+        ctx.strokeRect(car.x - 6, car.y - 6, car.w + 12, car.h + 12);
+        ctx.restore();
+      }
 
-        // Slow power effect
-        if (powerState === "SLOW") {
-            ctx.save();
-            ctx.strokeStyle = "rgba(100, 200, 255, 0.6)";
-            for (let i = 0; i < 3; i++) {
-                ctx.strokeRect(
-                    car.x - 10 - i * 6,
-                    car.y - 10 - i * 6,
-                    car.w + 20 + i * 12,
-                    car.h + 20 + i * 12
-                );
-            }
-            ctx.restore();
+      if (powerState === "SLOW") {
+        ctx.save();
+        ctx.strokeStyle = "rgba(100, 200, 255, 0.6)";
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeRect(
+            car.x - 10 - i * 6,
+            car.y - 10 - i * 6,
+            car.w + 20 + i * 12,
+            car.h + 20 + i * 12
+          );
         }
+        ctx.restore();
+      }
 
-        // 2X score multiplier effect
-        if (powerState === "2X") {
-            ctx.save();
-            ctx.fillStyle = "rgba(255, 215, 0, 0.15)";
-            ctx.shadowColor = "#ffd700";
-            ctx.shadowBlur = 20;
-            ctx.fillRect(car.x - 8, car.y - 8, car.w + 16, car.h + 16);
-            ctx.restore();
-        }
+      if (powerState === "2X") {
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 215, 0, 0.15)";
+        ctx.shadowColor = "#ffd700";
+        ctx.shadowBlur = 20;
+        ctx.fillRect(car.x - 8, car.y - 8, car.w + 16, car.h + 16);
+        ctx.restore();
+      }
     }
 
     function activatePower() {
-        const powers = ["SHIELD", "SLOW", "2X"];    
-        powerState = powers[Math.floor(Math.random() * 3)];    
-        powerTimer = 300; // 5 seconds
-        powerCooldown = 900; // 15 seconds cooldown
-        powerText.textContent = "POWER: " + powerState;    
-        powerMsg = powerState + " POWER!"; 
-        powerMsgTimer = 60;    
-        
-        if (powerState === "SHIELD") {
-            car.shield = true;
-        }
-        
-        if (powerState === "SLOW") {
-            slowMultiplier = 0.6; // 40% slower
-            originalSpeed = speed; // Store current speed
-        }
-        
-        if (powerState === "2X") {
-            scoreMultiplier = 2;
-            baseDistance = distance; // Store current distance
-            scoreDuring2X = score; // Store current score when 2X starts
-        }
+      const powers = ["SHIELD", "SLOW", "2X"];    
+      powerState = powers[Math.floor(Math.random() * 3)];    
+      powerTimer = 300;
+      powerCooldown = 900;
+      powerText.textContent = "POWER: " + powerState;    
+      powerMsg = powerState + " POWER!"; 
+      powerMsgTimer = 60;    
+      
+      if (powerState === "SHIELD") {
+        car.shield = true;
+      }
+      
+      if (powerState === "SLOW") {
+        slowMultiplier = 0.6;
+        originalSpeed = speed;
+      }
+      
+      if (powerState === "2X") {
+        scoreMultiplier = 2;
+        baseDistance = distance;
+        scoreDuring2X = score;
+      }
     }
-    
+
     // ===== CAR SELECTION SYSTEM =====
     function showCarSelection() {
-        startBox.style.display = "none";
-        gameOverBox.style.display = "none"; // FIXED: Hide game over box
-        updateUnlockedCars();
-        renderCarSelection();
-        carSelectBox.style.display = "flex";
+      startBox.style.display = "none";
+      gameOverBox.style.display = "none";
+      updateUnlockedCars();
+      renderCarSelection();
+      carSelectBox.style.display = "flex";
     }
     
     function updateUnlockedCars() {
-        // Get unlocked cars from localStorage
-        const savedUnlocked = localStorage.getItem("rr_unlocked_cars");
-        if (savedUnlocked) {
-            unlockedCars = JSON.parse(savedUnlocked);
-        } else {
-            unlockedCars = [0]; // Start with first car
-            localStorage.setItem("rr_unlocked_cars", JSON.stringify(unlockedCars));
-        }
-        
-        // Unlock cars based on high score
-        const checkpoints = [2000, 3000, 4000, 5000, 10000];
-        checkpoints.forEach((checkpoint, index) => {
-            if (highScore >= checkpoint && !unlockedCars.includes(index + 1)) {
-                unlockedCars.push(index + 1);
-            }
-        });
-        
-        // Save updated unlocked cars
+      const savedUnlocked = localStorage.getItem("rr_unlocked_cars");
+      if (savedUnlocked) {
+        unlockedCars = JSON.parse(savedUnlocked);
+      } else {
+        unlockedCars = [0];
         localStorage.setItem("rr_unlocked_cars", JSON.stringify(unlockedCars));
-        
-        // Update car database
-        carDatabase.forEach((car, index) => {
-            car.unlocked = unlockedCars.includes(index);
-        });
+      }
+      
+      const checkpoints = [2000, 3000, 4000, 5000, 10000];
+      checkpoints.forEach((checkpoint, index) => {
+        if (highScore >= checkpoint && !unlockedCars.includes(index + 1)) {
+          unlockedCars.push(index + 1);
+        }
+      });
+      
+      localStorage.setItem("rr_unlocked_cars", JSON.stringify(unlockedCars));
+      
+      carDatabase.forEach((car, index) => {
+        car.unlocked = unlockedCars.includes(index);
+      });
     }
     
     function renderCarSelection() {
-        carGrid.innerHTML = '';
-        const carsPerPage = 6;
-        const startIndex = currentCarPage * carsPerPage;
-        const endIndex = Math.min(startIndex + carsPerPage, carDatabase.length);
+      carGrid.innerHTML = '';
+      const carsPerPage = 6;
+      const startIndex = currentCarPage * carsPerPage;
+      const endIndex = Math.min(startIndex + carsPerPage, carDatabase.length);
+      
+      for (let i = startIndex; i < endIndex; i++) {
+        const carData = carDatabase[i];
+        const carOption = document.createElement('div');
+        carOption.className = `car-option ${carData.unlocked ? '' : 'locked'} ${i === selectedCarIndex ? 'selected' : ''}`;
+        carOption.onclick = () => selectCar(i);
         
-        for (let i = startIndex; i < endIndex; i++) {
-            const carData = carDatabase[i];
-            const carOption = document.createElement('div');
-            carOption.className = `car-option ${carData.unlocked ? '' : 'locked'} ${i === selectedCarIndex ? 'selected' : ''}`;
-            carOption.onclick = () => selectCar(i);
-            
-            // Simplified display - removed handling and acceleration
-            carOption.innerHTML = `
-                <img src="${carData.image}" class="car-preview" alt="${carData.name}">
-                <div class="car-name">${carData.name}</div>
-                <div class="car-simple-stats">
-                    Speed: ${carData.speed}/10<br>
-                    ${carData.description}
-                </div>
-                ${!carData.unlocked ? `<div class="car-unlock-req">${carData.unlockRequirement}</div>` : ''}
-            `;
-            
-            carGrid.appendChild(carOption);
-        }
+        carOption.innerHTML = `
+          <img src="${carData.image}" class="car-preview" alt="${carData.name}">
+          <div class="car-name">${carData.name}</div>
+          <div class="car-simple-stats">
+            Speed: ${carData.speed}/10<br>
+            ${carData.description}
+          </div>
+          ${!carData.unlocked ? `<div class="car-unlock-req">${carData.unlockRequirement}</div>` : ''}
+        `;
         
-        // Update selected car preview
-        const selectedCar = carDatabase[selectedCarIndex];
-        selectedCarPreview.src = selectedCar.image;
+        carGrid.appendChild(carOption);
+      }
+      
+      const selectedCar = carDatabase[selectedCarIndex];
+      selectedCarPreview.src = selectedCar.image;
     }
     
     function selectCar(index) {
-        const carData = carDatabase[index];
-        if (!carData.unlocked) {
-            showTopMessage("Locked! " + carData.unlockRequirement);
-            return;
-        }
-        
-        selectedCarIndex = index;
-        renderCarSelection();
+      const carData = carDatabase[index];
+      if (!carData.unlocked) {
+        showTopMessage("Locked! " + carData.unlockRequirement);
+        return;
+      }
+      
+      selectedCarIndex = index;
+      renderCarSelection();
     }
     
     function prevCarPage() {
-        if (currentCarPage > 0) {
-            currentCarPage--;
-            renderCarSelection();
-        }
+      if (currentCarPage > 0) {
+        currentCarPage--;
+        renderCarSelection();
+      }
     }
     
     function nextCarPage() {
-        const totalPages = Math.ceil(carDatabase.length / 6);
-        if (currentCarPage < totalPages - 1) {
-            currentCarPage++;
-            renderCarSelection();
-        }
+      const totalPages = Math.ceil(carDatabase.length / 6);
+      if (currentCarPage < totalPages - 1) {
+        currentCarPage++;
+        renderCarSelection();
+      }
     }
     
     function confirmCarSelection() {
-        const selectedCar = carDatabase[selectedCarIndex];
-        if (!selectedCar.unlocked) {
-            showTopMessage("This car is locked!");
-            return;
-        }
-        
-        // Load the selected car image
-        const img = new Image();
-        img.src = selectedCar.image;
-        img.onload = () => {
-            playerImg = img;
-            startGame();
-        };
-        img.onerror = () => {
-            // Fallback to default car if image fails to load
-            startGame();
-        };
+      const selectedCar = carDatabase[selectedCarIndex];
+      if (!selectedCar.unlocked) {
+        showTopMessage("This car is locked!");
+        return;
+      }
+      
+      const img = new Image();
+      img.src = selectedCar.image;
+      img.onload = () => {
+        playerImg = img;
+        startGame();
+      };
+      img.onerror = () => {
+        startGame();
+      };
     }
     
     function quickStart() {
-        // Use default car (index 0)
-        selectedCarIndex = 0;
-        const img = new Image();
-        img.src = carDatabase[0].image;
-        img.onload = () => {
-            playerImg = img;
-            startGame();
-        };
-        img.onerror = () => {
-            startGame();
-        };
+      selectedCarIndex = 0;
+      const img = new Image();
+      img.src = carDatabase[0].image;
+      img.onload = () => {
+        playerImg = img;
+        startGame();
+      };
+      img.onerror = () => {
+        startGame();
+      };
     }
     
     function backToMenu() {
-        carSelectBox.style.display = "none";
-        startBox.style.display = "flex";
+      carSelectBox.style.display = "none";
+      startBox.style.display = "flex";
     }
     
     function backToMenuFromGameOver() {
-        gameOverBox.style.display = "none";
-        startBox.style.display = "flex";
+      gameOverBox.style.display = "none";
+      startBox.style.display = "flex";
     }
-    
-    // ===== SIMPLE MESSAGES SYSTEM =====
+
+    // ===== MESSAGE SYSTEM =====
+    const simpleMessages = [
+      "Miss mo na ba s'ya?",
+      "What if mahal ka pa n'ya?",
+      "I miss yoy",
+      "Okay lang 'yan",
+      "Kaya pa 'yan late game",
+      "Balik ka na",
+      "Don't give up!",
+      "Sana ako na lang",
+      "Mahal pa kita",
+      "Akala mo mahal ka n'ya?",
+      "Sana ikaw na lang no?",
+      "Masarap ba na parang wala ka lang sa kanya?",
+      "Kaya pa yan late game"
+    ];
+
     function showTopMessage(message) {
-        if (!gameStarted || gamePaused || isCountdown || gameOver) return;
-        
-        // Don't show if another message is still visible
-        if (parseFloat(topMessage.style.opacity) > 0) return;
-        
-        topMessage.textContent = message;
-        topMessage.style.opacity = "1";
-        
-        // Set timer to hide message after 2 seconds
-        messageTimer = 120; // 2 seconds at 60fps
-        lastMessageTime = score; // Track when we showed last message
+      if (!gameStarted || gamePaused || isCountdown || gameOver) return;
+      
+      if (parseFloat(topMessage.style.opacity) > 0) return;
+      
+      topMessage.textContent = message;
+      topMessage.style.opacity = "1";
+      
+      messageTimer = 120;
+      lastMessageTime = score;
     }
     
     function updateTopMessage() {
-        if (messageTimer > 0) {
-            messageTimer--;
-            
-            // Fade out in last 40 frames (0.66 seconds)
-            if (messageTimer <= 40) {
-                topMessage.style.opacity = (messageTimer / 40).toString();
-            }
+      if (messageTimer > 0) {
+        messageTimer--;
+        
+        if (messageTimer <= 40) {
+          topMessage.style.opacity = (messageTimer / 40).toString();
         }
+      }
     }
     
     function showRandomMessage() {
-        if (!gameStarted || gamePaused || isCountdown || gameOver) return;
-        
-        // Don't show if message is already visible
-        if (parseFloat(topMessage.style.opacity) > 0) return;
-        
-        // Paminsan-minsan lang - only show every 30-40 seconds
-        // And only if at least 500 points have passed since last message
-        if (score - lastMessageTime > 500 && Math.random() < 0.002) { // 0.2% chance per frame
-            const randomIndex = Math.floor(Math.random() * simpleMessages.length);
-            showTopMessage(simpleMessages[randomIndex]);
+      if (!gameStarted || gamePaused || isCountdown || gameOver) return;
+      
+      if (parseFloat(topMessage.style.opacity) > 0) return;
+      
+      if (score - lastMessageTime > 500 && Math.random() < 0.002) {
+        const randomIndex = Math.floor(Math.random() * simpleMessages.length);
+        showTopMessage(simpleMessages[randomIndex]);
+      }
+      
+      if (score > 0 && score % 1000 === 0 && score - lastMessageTime > 300) {
+        showTopMessage(`${score} points! Awesome!`);
+      }
+      
+      if (highScore > 0 && score > highScore - 200 && score < highScore) {
+        if (score - lastMessageTime > 400) {
+          showTopMessage("Almost beat your record!");
         }
-        
-        // Special messages on milestones
-        if (score > 0 && score % 1000 === 0 && score - lastMessageTime > 300) {
-            showTopMessage(`${score} points! Awesome!`);
+      }
+      
+      if (powerMsgTimer === 59) {
+        if (score - lastMessageTime > 300) {
+          showTopMessage(" what if mahal ka pa n'ya? Power up boi!");
         }
-        
-        // Message when close to high score
-        if (highScore > 0 && score > highScore - 200 && score < highScore) {
-            if (score - lastMessageTime > 400) {
-                showTopMessage("Almost beat your record!");
-            }
-        }
-        
-        // Message when power is activated
-        if (powerMsgTimer === 59) { // When power message just showed
-            if (score - lastMessageTime > 300) {
-                showTopMessage(" what if mahal ka pa n'ya? Power up boi!");
-            }
-        }
+      }
     }
-    
-    // ===== PAUSE/RESUME FUNCTIONS =====
+
+    // ===== PAUSE/RESUME SYSTEM =====
     function togglePause() {
-        if (!gameStarted || gameOver || isCountdown) return;
-        
-        if (!gamePaused) {
-            // Pause the game
-            pauseGame(false); // false = manual pause
-        } else {
-            // If already paused, resume directly
-            resumeGame();
-        }
+      if (!gameStarted || gameOver || isCountdown) return;
+      
+      if (!gamePaused) {
+        pauseGame(false);
+      } else {
+        resumeGame();
+      }
     }
     
     function pauseGame(isAutoPause) {
-        if (gamePaused || !gameStarted || gameOver || isCountdown) return;
-        
-        gamePaused = true;
-        autoPaused = isAutoPause;
-        
-        if (isAutoPause) {
-            // Auto-pause - show indicator but not full menu
-            bgPauseIndicator.style.display = "block";
-            pauseBtn.classList.add("paused"); // Change to play icon
-        } else {
-            // Manual pause - show full menu
-            pauseMenu.style.display = "flex";
-            pauseBtn.classList.add("paused"); // Change to play icon
-            bgPauseIndicator.style.display = "none"; // Hide auto-pause indicator
-        }
-        
-        // Pause music
-        if (currentBG) {
-            currentBG.pause();
-        }
-        
-        // Hide top message when paused
-        topMessage.style.opacity = "0";
+      if (gamePaused || !gameStarted || gameOver || isCountdown) return;
+      
+      gamePaused = true;
+      autoPaused = isAutoPause;
+      
+      if (isAutoPause) {
+        bgPauseIndicator.style.display = "block";
+        pauseBtn.classList.add("paused");
+      } else {
+        pauseMenu.style.display = "flex";
+        pauseBtn.classList.add("paused");
+        bgPauseIndicator.style.display = "none";
+      }
+      
+      if (currentBG) {
+        currentBG.pause();
+      }
+      
+      topMessage.style.opacity = "0";
     }
     
     function resumeGame() {
-        if (!gamePaused) return;
-        
-        // Hide pause UI elements
-        pauseMenu.style.display = "none";
-        bgPauseIndicator.style.display = "none";
-        
-        // Start countdown
-        startCountdown();
+      if (!gamePaused) return;
+      
+      pauseMenu.style.display = "none";
+      bgPauseIndicator.style.display = "none";
+      
+      startCountdown();
     }
     
     function startCountdown() {
-        isCountdown = true;
-        countdownOverlay.style.display = "flex";
-        
-        let count = 3;
-        countdownNumber.textContent = count;
-        
-        const countdownInterval = setInterval(() => {
-            count--;
-            if (count > 0) {
-                countdownNumber.textContent = count;
-            } else {
-                countdownNumber.textContent = "GO!";
-                
-                // After "GO!", resume game
-                setTimeout(() => {
-                    clearInterval(countdownInterval);
-                    countdownOverlay.style.display = "none";
-                    gamePaused = false;
-                    isCountdown = false;
-                    autoPaused = false;
-                    pauseBtn.classList.remove("paused"); // Change back to pause icon
-                    
-                    // Resume music
-                    if (currentBG && musicEnabled) {
-                        currentBG.play().catch(() => {
-                            musicEnabled = false;
-                        });
-                    }
-                }, 1000);
+      isCountdown = true;
+      countdownOverlay.style.display = "flex";
+      
+      let count = 3;
+      countdownNumber.textContent = count;
+      
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownNumber.textContent = count;
+        } else {
+          countdownNumber.textContent = "GO!";
+          
+          setTimeout(() => {
+            clearInterval(countdownInterval);
+            countdownOverlay.style.display = "none";
+            gamePaused = false;
+            isCountdown = false;
+            autoPaused = false;
+            pauseBtn.classList.remove("paused");
+            
+            if (currentBG && musicEnabled) {
+              currentBG.play().catch(() => {
+                musicEnabled = false;
+              });
             }
-        }, 1000);
+          }, 1000);
+        }
+      }, 1000);
     }
     
     function restartGame() {
-        // Close pause menu
-        pauseMenu.style.display = "none";
-        bgPauseIndicator.style.display = "none";
-        gamePaused = false;
-        autoPaused = false;
-        pauseBtn.classList.remove("paused"); // Reset to pause icon
-        
-        // Restart the game with current selected car
-        const img = new Image();
-        img.src = carDatabase[selectedCarIndex].image;
-        img.onload = () => {
-            playerImg = img;
-            startGame();
-        };
-        img.onerror = () => {
-            startGame();
-        };
+      pauseMenu.style.display = "none";
+      bgPauseIndicator.style.display = "none";
+      gamePaused = false;
+      autoPaused = false;
+      pauseBtn.classList.remove("paused");
+      
+      const img = new Image();
+      img.src = carDatabase[selectedCarIndex].image;
+      img.onload = () => {
+        playerImg = img;
+        startGame();
+      };
+      img.onerror = () => {
+        startGame();
+      };
     }
     
     function quitToMenu() {
-        // Close pause menu
-        pauseMenu.style.display = "none";
-        bgPauseIndicator.style.display = "none";
-        gamePaused = false;
-        gameStarted = false;
-        autoPaused = false;
-        pauseBtn.style.display = "none";
-        pauseBtn.classList.remove("paused"); // Reset to pause icon for next game
-        
-        // Show car selection
-        showCarSelection();
-        
-        // Stop music
-        stopMusic();
+      pauseMenu.style.display = "none";
+      bgPauseIndicator.style.display = "none";
+      gamePaused = false;
+      gameStarted = false;
+      autoPaused = false;
+      pauseBtn.style.display = "none";
+      pauseBtn.classList.remove("paused");
+      
+      showCarSelection();
+      stopMusic();
+      stopCacheMonitor();
     }
-    
-    // ===== PAGE VISIBILITY HANDLER =====
+
+    // ===== PAGE VISIBILITY =====
     function handleVisibilityChange() {
-        if (document.hidden) {
-            // Page is hidden (tab switched, app minimized, etc.)
-            if (gameStarted && !gameOver && !gamePaused && !isCountdown) {
-                pauseGame(true); // Auto-pause the game
-            }
-            // Always stop music when page is hidden
-            if (currentBG) {
-                currentBG.pause();
-            }
-        } else {
-            // Page is visible again
-            // Note: We don't auto-resume here - user needs to click resume
+      if (document.hidden) {
+        if (gameStarted && !gameOver && !gamePaused && !isCountdown) {
+          pauseGame(true);
         }
+        if (currentBG) {
+          currentBG.pause();
+        }
+      }
     }
     
-    // Set up visibility change listener
     document.addEventListener("visibilitychange", handleVisibilityChange);
-        
+
+    // ===== MAIN GAME LOOP =====
     function loop() {    
-        // Clear canvas
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#141414";
-        ctx.fillRect(50, 0, 400, H);
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = "#141414";
+      ctx.fillRect(50, 0, 400, H);
 
-        // Update and draw road lines
-        roadLines.forEach(l => { 
-            l.y += speed; 
-            if (l.y > H) l.y = -80; 
-            ctx.fillStyle = "#bbb"; 
-            ctx.fillRect(W/2 - 5, l.y, 10, 40); 
-        });    
+      roadLines.forEach(l => { 
+        l.y += speed; 
+        if (l.y > H) l.y = -80; 
+        ctx.fillStyle = "#bbb"; 
+        ctx.fillRect(W/2 - 5, l.y, 10, 40); 
+      });    
+      
+      sideMarkers.forEach(s => { 
+        s.y += speed; 
+        if (s.y > H) s.y = -80; 
+        ctx.fillStyle = "#444"; 
+        ctx.fillRect(50, s.y, 2, 40); 
+        ctx.fillRect(448, s.y, 2, 40); 
+      });    
+      
+      ctx.fillStyle = "rgba(255,255,255,0.08)";
+      ctx.fillRect(50, 0, 400, H);
+
+      if (gameStarted && !gameOver && !gamePaused && !isCountdown) {    
+        updateTopMessage();
+        showRandomMessage();
         
-        // Update and draw side markers
-        sideMarkers.forEach(s => { 
-            s.y += speed; 
-            if (s.y > H) s.y = -80; 
-            ctx.fillStyle = "#444"; 
-            ctx.fillRect(50, s.y, 2, 40); 
-            ctx.fillRect(448, s.y, 2, 40); 
-        });    
-        
-        // subtle road light wash (HD effect)
-        ctx.fillStyle = "rgba(255,255,255,0.08)";
-        ctx.fillRect(50, 0, 400, H);
-
-        if (gameStarted && !gameOver && !gamePaused && !isCountdown) {    
-            // ========== SIMPLE MESSAGES ==========
-            updateTopMessage();
-            showRandomMessage();
-            
-            // ========== POWER-UP SYSTEM ==========
-            // Active power timer
-            if (powerTimer > 0) {
-                powerTimer--;
-                powerFill.style.width = (powerTimer / 300 * 100) + "%";
-                powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
-                
-                if (powerTimer <= 0) {
-                    // Power expired
-                    if (powerState === "SHIELD") car.shield = false;
-                    if (powerState === "SLOW") {
-                        slowMultiplier = 1;
-                    }
-                    if (powerState === "2X") {
-                        scoreMultiplier = 1;
-                        // FIXED: Ensure score doesn't drop when 2X ends
-                        // Update distance to match the doubled score we achieved
-                        if (score > distance) {
-                            distance = score; // Keep the higher score as distance
-                        }
-                    }
-                    
-                    powerState = null;
-                    powerText.textContent = "";
-                    powerFill.style.width = "0%";
-                    powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
-                }
+        if (powerTimer > 0) {
+          powerTimer--;
+          powerFill.style.width = (powerTimer / 300 * 100) + "%";
+          powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+          
+          if (powerTimer <= 0) {
+            if (powerState === "SHIELD") car.shield = false;
+            if (powerState === "SLOW") {
+              slowMultiplier = 1;
             }
-            
-            // Cooldown timer (shows when next power available)
-            if (powerState === null && powerCooldown > 0) {
-                powerCooldown--;
-                let cooldownPercent = Math.max(0, ((900 - powerCooldown) / 900) * 100);
-                powerFill.style.width = cooldownPercent + "%";
-                powerFill.style.background = "#666";
-                
-                if (powerCooldown <= 0) {
-                    powerFill.style.width = "0%";
-                    powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
-                }
-            }
-            
-            let dir = inputDir;    
-            car.x += dir * 7;
-            car.x = Math.max(60, Math.min(car.x, 440 - car.w));
-
-            // ========== SCORING SYSTEM ==========
-            let distanceGained = speed / 12;
-            distance += distanceGained;
-            
-            // PERFECT 2X FIX: Only new distance is doubled
             if (powerState === "2X") {
-                // Current distance minus base distance = new distance gained
-                let newDistance = distance - baseDistance;
-                // Score = base score + (new distance * 2)
-                score = Math.floor(baseDistance + (newDistance * 2));
-            } else {
-                // FIXED: Use Math.max to ensure score never decreases
-                score = Math.max(score, Math.floor(distance));
+              scoreMultiplier = 1;
+              if (score > distance) {
+                distance = score;
+              }
             }
             
-            scoreText.textContent = score;    
-            
-            // ========== DIFFICULTY & SPEED ==========
-            // Calculate normal speed
-            let level = Math.floor(score / 1000);
-            let baseSpeed = 4;
-            let levelSpeed = level * 0.6;
-            let smoothSpeed = distance / 600;
-            let calculatedSpeed = Math.min(10, baseSpeed + levelSpeed + smoothSpeed);
-            
-            // Apply car speed bonus based on selected car
-            const selectedCar = carDatabase[selectedCarIndex];
-            let carSpeedBonus = (selectedCar.speed - 7) * 0.1; // -0.2 to +0.3
-            let carHandlingBonus = (selectedCar.handling - 8) * 0.05; // -0.15 to +0.1
-            
-            // Apply SLOW effect if active
-            if (powerState === "SLOW" && powerTimer > 0) {
-                speed = calculatedSpeed * slowMultiplier * (1 + carSpeedBonus);
-            } else {
-                speed = calculatedSpeed * (1 + carSpeedBonus);
-            }
-            
-            // Apply handling bonus to turning
-            car.x += dir * (7 + carHandlingBonus * 2);
-
-            // ========== POWER-UP SPAWNING ==========
-            if (score >= nextPowerScore && powerState === null && powerCooldown <= 0) { 
-                activatePower(); 
-                nextPowerScore = score + 400;
-            }    
-
-            // ========== ENEMY SPAWNING ==========
-            spawnTimer++;
-            
-            if (spawnTimer > Math.max(80, 140 - distance / 10)) {
-                spawnEnemies(); 
-                spawnTimer = 0; 
-            }
-
-            // ========== ENEMY UPDATES ==========
-            enemies.forEach((e, i) => {  
-                e.y += speed; // Simple speed, not multiplied
-                drawEnemy(e);  
-                
-                // Check collision - FIXED SHIELD BUG
-                if (hit(car, e)) {    
-                    if (powerState === "SHIELD" && car.shield && powerTimer > 0) {
-                        // Shield active - deflect enemy and reduce power time
-                        e.y = H + 200;
-                        powerTimer = Math.max(0, powerTimer - 50); // -50 frames
-                        
-                        // After using shield once, disable it
-                        car.shield = false;
-                        powerText.textContent = "POWER: SHIELD (USED)";
-                    } else {    
-                        // Game over
-                        gameOver = true;
-                        stopMusic();
-                        
-                        // Update high score
-                        if (score > highScore) { 
-                            highScore = score; 
-                            localStorage.setItem("rr_high_pro", score); 
-                            bestText.textContent = "Top Record: " + score; 
-                        }    
-                        
-                        // Update unlocked cars
-                        updateUnlockedCars();
-                        
-                        finalScore.textContent = score; 
-                        gameOverBox.style.display = "flex";
-                        pauseBtn.style.display = "none"; // Hide pause button on game over
-                        bgPauseIndicator.style.display = "none"; // Hide auto-pause indicator
-                    }    
-                }  
-            });  
-            // Remove off-screen enemies
-            enemies = enemies.filter(e => e.y < H + 120);
-
-            // ========== DRAWING ==========
-            drawPlayer(car); 
-            drawPowerEffects();  
-
-            // Show power-up message
-            if (powerMsgTimer > 0) {    
-                ctx.save(); 
-                ctx.globalAlpha = powerMsgTimer / 60; 
-                ctx.fillStyle = "#00ffff";
-                ctx.font = "bold 28px Courier";
-                ctx.textAlign = "center"; 
-                ctx.fillText(powerMsg, W / 2, H / 2 - 40); 
-                ctx.restore(); 
-                powerMsgTimer--;    
-            }
-            
-            // Show SLOW effect indicator
-            if (powerState === "SLOW" && powerTimer > 0) {
-                ctx.save();
-                ctx.globalAlpha = 0.3;
-                ctx.fillStyle = "#00aaff";
-                ctx.font = "bold 20px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("SLOW", W / 2, 40);
-                ctx.restore();
-            }
-            
-            // Show 2X effect indicator
-            if (powerState === "2X" && powerTimer > 0) {
-                ctx.save();
-                ctx.globalAlpha = 0.3;
-                ctx.fillStyle = "#ffd700";
-                ctx.font = "bold 20px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("2X SCORE MULTIPLIER", W / 2, 40);
-                ctx.restore();
-            }
-            
-            // Show current speed with car name
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = "#fff";
-            ctx.font = "12px sans-serif";
-            ctx.textAlign = "left";
-            ctx.fillText(`Speed: ${speed.toFixed(1)} | Car: ${carDatabase[selectedCarIndex].name}`, 20, H - 20);
-            ctx.restore();
-        } else if (!gameOver) {
-            // Kapag hindi naglalaro (game over o nasa menu), i-reset ang power UI
+            powerState = null;
             powerText.textContent = "";
             powerFill.style.width = "0%";
             powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+          }
         }
         
-        requestAnimationFrame(loop);    
-    }    
+        if (powerState === null && powerCooldown > 0) {
+          powerCooldown--;
+          let cooldownPercent = Math.max(0, ((900 - powerCooldown) / 900) * 100);
+          powerFill.style.width = cooldownPercent + "%";
+          powerFill.style.background = "#666";
+          
+          if (powerCooldown <= 0) {
+            powerFill.style.width = "0%";
+            powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+          }
+        }
         
-    // Prevent touch scrolling
-    document.addEventListener("touchmove", e => {
-        e.preventDefault();
-    }, { passive: false });
+        let dir = inputDir;    
+        car.x += dir * 7;
+        car.x = Math.max(60, Math.min(car.x, 440 - car.w));
 
-    // Initialize and start game
-    
-    function stopMusic() {
-        if (currentBG) {
-            currentBG.pause();
-            currentBG.currentTime = 0;
+        let distanceGained = speed / 12;
+        distance += distanceGained;
+        
+        if (powerState === "2X") {
+          let newDistance = distance - baseDistance;
+          score = Math.floor(baseDistance + (newDistance * 2));
+        } else {
+          score = Math.max(score, Math.floor(distance));
         }
+        
+        scoreText.textContent = score;
+        bestText.textContent = "Top Record: " + highScore;
+        
+        let level = Math.floor(score / 1000);
+        let baseSpeed = 4;
+        let levelSpeed = level * 0.6;
+        let smoothSpeed = distance / 600;
+        let calculatedSpeed = Math.min(10, baseSpeed + levelSpeed + smoothSpeed);
+        
+        const selectedCar = carDatabase[selectedCarIndex];
+        let carSpeedBonus = (selectedCar.speed - 7) * 0.1;
+        let carHandlingBonus = (selectedCar.handling - 8) * 0.05;
+        
+        if (powerState === "SLOW" && powerTimer > 0) {
+          speed = calculatedSpeed * slowMultiplier * (1 + carSpeedBonus);
+        } else {
+          speed = calculatedSpeed * (1 + carSpeedBonus);
+        }
+        
+        car.x += dir * (7 + carHandlingBonus * 2);
+
+        if (score >= nextPowerScore && powerState === null && powerCooldown <= 0) { 
+          activatePower(); 
+          nextPowerScore = score + 400;
+        }    
+
+        spawnTimer++;
+        
+        if (spawnTimer > Math.max(80, 140 - distance / 10)) {
+          spawnEnemies(); 
+          spawnTimer = 0; 
+        }
+
+        enemies.forEach((e, i) => {  
+          e.y += speed;
+          drawEnemy(e);  
+          
+          if (hit(car, e)) {    
+            if (powerState === "SHIELD" && car.shield && powerTimer > 0) {
+              e.y = H + 200;
+              powerTimer = Math.max(0, powerTimer - 50);
+              car.shield = false;
+              powerText.textContent = "POWER: SHIELD (USED)";
+            } else {    
+              gameOver = true;
+              stopMusic();
+              stopCacheMonitor();
+              
+              if (score > highScore) { 
+                highScore = score; 
+                localStorage.setItem("rr_high_pro", score); 
+                bestText.textContent = "Top Record: " + score; 
+              }    
+              
+              updateUnlockedCars();
+              
+              finalScore.textContent = score; 
+              gameOverBox.style.display = "flex";
+              pauseBtn.style.display = "none";
+              bgPauseIndicator.style.display = "none";
+            }    
+          }  
+        });  
+        
+        enemies = enemies.filter(e => e.y < H + 120);
+
+        drawPlayer(car); 
+        drawPowerEffects();  
+
+        if (powerMsgTimer > 0) {    
+          ctx.save(); 
+          ctx.globalAlpha = powerMsgTimer / 60; 
+          ctx.fillStyle = "#00ffff";
+          ctx.font = "bold 28px Courier";
+          ctx.textAlign = "center"; 
+          ctx.fillText(powerMsg, W / 2, H / 2 - 40); 
+          ctx.restore(); 
+          powerMsgTimer--;    
+        }
+        
+        if (powerState === "SLOW" && powerTimer > 0) {
+          ctx.save();
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = "#00aaff";
+          ctx.font = "bold 20px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("SLOW", W / 2, 40);
+          ctx.restore();
+        }
+        
+        if (powerState === "2X" && powerTimer > 0) {
+          ctx.save();
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = "#ffd700";
+          ctx.font = "bold 20px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("2X SCORE MULTIPLIER", W / 2, 40);
+          ctx.restore();
+        }
+        
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText(`Speed: ${speed.toFixed(1)} | Car: ${carDatabase[selectedCarIndex].name}`, 20, H - 20);
+        ctx.restore();
+      } else if (!gameOver) {
+        powerText.textContent = "";
+        powerFill.style.width = "0%";
+        powerFill.style.background = getComputedStyle(document.documentElement).getPropertyValue('--neon-blue').trim();
+      }
+      
+      requestAnimationFrame(loop);    
     }
 
-    // Keep existing visibility change for music only
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            if (currentBG) {
-                currentBG.pause();
-            }
-        }
+    // ===== PWA INSTALLATION SYSTEM =====
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      if (installBtn) {
+        installBtn.style.display = 'block';
+        installBtn.textContent = '📲 INSTALL (Includes Full Music Pack)';
+        
+        verifyAudioCache().then(cached => {
+          if (cached) {
+            installBtn.title = 'Full game with music ready for offline';
+          } else {
+            installBtn.title = 'Install now - music will download in background';
+          }
+        });
+        
+        setTimeout(() => {
+          installBtn.style.display = 'none';
+        }, 30000);
+      }
     });
 
-    window.addEventListener("pagehide", stopMusic);
-    window.addEventListener("beforeunload", stopMusic);   
-    // ===== PWA INSTALLATION LOGIC =====
-let deferredPrompt;
-
-// Show install button when possible
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  const installBtn = document.getElementById('installBtn');
-  if (installBtn) {
-    installBtn.style.display = 'block';
-    
-    // Auto-hide after 30 seconds
-    setTimeout(() => {
-      installBtn.style.display = 'none';
-    }, 30000);
-  }
-});
-
-function installGame() {
-  if (!deferredPrompt) {
-    alert("Installation not available or already installed");
-    return;
-  }
-  
-  deferredPrompt.prompt();
-  
-  deferredPrompt.userChoice.then(choiceResult => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User installed Road Rage 2D');
+    function installGame() {
+      if (!deferredPrompt) {
+        alert("Installation not available or already installed");
+        return;
+      }
       
-      // Show success message in game
-      showTopMessage('✅ Game Installed! Launch from home screen anytime.');
-    }
-    deferredPrompt = null;
-    
-    const installBtn = document.getElementById('installBtn');
-    if (installBtn) installBtn.style.display = 'none';
-  });
-}
-
-// ===== REGISTER SERVICE WORKER =====
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(registration => {
-        console.log('✅ Service Worker registered for offline play:', registration.scope);
+      if (installProgress) {
+        installProgress.style.display = 'block';
+        progressText.textContent = 'Starting installation...';
+      }
+      
+      deferredPrompt.prompt();
+      
+      deferredPrompt.userChoice.then(choiceResult => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('✅ User installed Road Rage 2D');
+          
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+              registration.update();
+            });
+          }
+          
+          setTimeout(() => {
+            preloadAllAudio();
+            startCacheMonitor();
+          }, 2000);
+          
+          showTopMessage('🎮 Game Installed! Works 100% offline.');
+        }
         
-        // Check cache status
-        registration.update();
+        deferredPrompt = null;
         
-        // Show cache status in console (optional)
-        caches.open('road-rage-offline-v1.0').then(cache => {
-          cache.keys().then(keys => {
-            console.log(`📦 ${keys.length} game files cached for offline play`);
-            
-            // Show message in game if caching successful
-            if (keys.length > 10) {
-              setTimeout(() => {
-                showTopMessage('✅ Game ready for offline play!');
-              }, 3000);
-            }
-          });
-        });
-      })
-      .catch(err => {
-        console.log('❌ Service Worker registration failed:', err);
+        if (installBtn) installBtn.style.display = 'none';
+        if (installProgress) installProgress.style.display = 'none';
       });
-  });
-}
+    }
 
-// ===== OFFLINE DETECTION =====
-window.addEventListener('online', () => {
-  console.log('🔵 Back online');
-  showTopMessage('✅ Back online - game synced');
-});
+    // ===== SERVICE WORKER PROGRESS MONITOR =====
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data.type === 'CACHE_PROGRESS') {
+          if (installProgress.style.display === 'none') {
+            installProgress.style.display = 'block';
+          }
+          
+          progressBar.style.width = `${event.data.progress}%`;
+          progressText.textContent = `Downloading: ${event.data.downloaded}/${event.data.total} files`;
+          assetStatus.textContent = `Current: ${event.data.current.split('/').pop()}`;
+          
+          if (event.data.progress >= 100) {
+            setTimeout(() => {
+              installProgress.style.display = 'none';
+              showTopMessage('✅ Game fully installed! Works offline.');
+              audioFullyCached = true;
+            }, 1000);
+          }
+        }
+      });
+    }
 
-window.addEventListener('offline', () => {
-  console.log('⚫ Went offline');
-  showTopMessage('⚫ Offline mode - all good!');
-});
+    // ===== SERVICE WORKER REGISTRATION =====
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(registration => {
+            console.log('✅ Service Worker registered for offline play:', registration.scope);
+            
+            registration.update();
+            
+            caches.open('road-rage-complete-v1.0').then(cache => {
+              cache.keys().then(keys => {
+                console.log(`📦 ${keys.length} game files cached for offline play`);
+                
+                if (keys.length > 10) {
+                  setTimeout(() => {
+                    showTopMessage('✅ Game ready for offline play!');
+                  }, 3000);
+                }
+              });
+            });
+          })
+          .catch(err => {
+            console.log('❌ Service Worker registration failed:', err);
+          });
+      });
+    }
 
-// Check initial connection
-if (!navigator.onLine) {
-  showTopMessage('⚫ Playing offline - all features available');
-}
+    // ===== ONLINE/OFFLINE DETECTION =====
+    window.addEventListener('online', () => {
+      console.log('🔵 Back online');
+      showTopMessage('✅ Back online - game synced');
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('⚫ Went offline');
+      showTopMessage('⚫ Offline mode - all good!');
+    });
+
+    if (!navigator.onLine) {
+      showTopMessage('⚫ Playing offline - all features available');
+    }
+
+    // Prevent touch scrolling
+    document.addEventListener("touchmove", e => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Initialize audio on first user interaction
+    document.addEventListener('click', () => {
+      if (bgAudios.length === 0) {
+        createAudioSystem();
+      }
+    }, { once: true });
+
+    document.addEventListener('touchstart', () => {
+      if (bgAudios.length === 0) {
+        createAudioSystem();
+      }
+    }, { once: true });
+
   </script>
 </body>
   </html>
