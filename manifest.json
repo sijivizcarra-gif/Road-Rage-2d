@@ -2,20 +2,20 @@
   "name": "Road Rage 2D",
   "short_name": "Road Rage",
   "description": "Master the highway. Avoid traffic. Use power-ups to survive.",
-  "start_url": "/",
+  "start_url": "/Road-Rage-2d/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/Road-Rage-2d/",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "/Road-Rage-2d/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "/Road-Rage-2d/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
