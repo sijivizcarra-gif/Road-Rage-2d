@@ -804,6 +804,28 @@
       console.log('🎵 Audio system created');
     }
 
+    // New function to start music from user click
+    function startGameMusic() {
+      // This function must be called DIRECTLY from a user click event
+      console.log('🎵 Starting game music from user action...');
+      
+      // Only play if music is enabled and system is created
+      if (!musicEnabled) {
+        musicEnabled = true;
+      }
+      
+      if (bgAudios.length === 0) {
+        createAudioSystem();
+        // Give audio system a moment to initialize
+        setTimeout(playRandomBG, 300);
+      } else {
+        playRandomBG();
+      }
+      
+      // Start cache monitor
+      startCacheMonitor();
+    }
+
     // Play music with retry logic
     function playRandomBG() {
       if (!musicEnabled || bgAudios.length === 0) return;
@@ -1105,21 +1127,8 @@
       pauseBtn.style.display = "flex";
       pauseBtn.classList.remove("paused");
 
-      if (bgAudios.length === 0) {
-        createAudioSystem();
-      }
-      
-      setTimeout(() => {
-        playRandomBG();
-        
-        verifyAudioCache().then(cached => {
-          if (!cached) {
-            showTopMessage('⚠️ Connect online once for full music pack');
-          }
-        });
-        
-        startCacheMonitor();
-      }, 800);
+      // Audio system will be initialized when user clicks play
+      // Music will start via startGameMusic() called from the button click
     }
 
     // ===== GAME LOGIC =====
@@ -1332,10 +1341,12 @@
       img.src = selectedCar.image;
       img.onload = () => {
         playerImg = img;
-        startGame();
+        startGame();      // Start the game first
+        startGameMusic(); // THEN start music from user click
       };
       img.onerror = () => {
-        startGame();
+        startGame();      // Start the game first
+        startGameMusic(); // THEN start music from user click
       };
     }
     
@@ -1345,10 +1356,12 @@
       img.src = carDatabase[0].image;
       img.onload = () => {
         playerImg = img;
-        startGame();
+        startGame();      // Start the game first
+        startGameMusic(); // THEN start music from user click
       };
       img.onerror = () => {
-        startGame();
+        startGame();      // Start the game first
+        startGameMusic(); // THEN start music from user click
       };
     }
     
@@ -1492,9 +1505,12 @@
             autoPaused = false;
             pauseBtn.classList.remove("paused");
             
-            if (currentBG && musicEnabled) {
-              currentBG.play().catch(() => {
-                musicEnabled = false;
+            // Resume music if it was playing before pause
+            if (musicEnabled && currentBG) {
+              currentBG.play().catch(e => {
+                console.log("Resume music failed:", e);
+                // Try playing a new track instead
+                setTimeout(playRandomBG, 100);
               });
             }
           }, 1000);
@@ -1514,9 +1530,11 @@
       img.onload = () => {
         playerImg = img;
         startGame();
+        startGameMusic(); // Also restart music on restart
       };
       img.onerror = () => {
         startGame();
+        startGameMusic(); // Also restart music on restart
       };
     }
     
