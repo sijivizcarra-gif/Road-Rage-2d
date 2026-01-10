@@ -1,14 +1,15 @@
-// ===== SERVICE WORKER FOR ROAD RAGE 2D =====
-const CACHE_NAME = 'road-rage-offline-v1.1';  // ← CHANGED VERSION
+// ===== SERVICE WORKER FOR ROAD RAGE 2D - ULTIMATE OFFLINE =====
+const CACHE_NAME = 'road-rage-complete-v1.0';
 const OFFLINE_URL = '/Road-Rage-2d/offline.html';
 
-// LIST ALL YOUR GAME FILES HERE
-const APP_ASSETS = [
-  // Main files - WITH CORRECT PATHS
+// COMPLETE LIST OF ALL GAME ASSETS
+const ALL_GAME_ASSETS = [
+  // HTML Files
   '/Road-Rage-2d/',
   '/Road-Rage-2d/index.html',
+  '/Road-Rage-2d/offline.html',
   
-  // All your car images - WITH CORRECT PATHS
+  // ALL CAR IMAGES
   '/Road-Rage-2d/imahe/image1.png',
   '/Road-Rage-2d/imahe/image2.png',
   '/Road-Rage-2d/imahe/image3.png',
@@ -19,110 +20,220 @@ const APP_ASSETS = [
   '/Road-Rage-2d/imahe/image8.png',
   '/Road-Rage-2d/imahe/image9.png',
   
-  // All your music files - WITH CORRECT PATHS
+  // ALL MUSIC FILES (ESSENTIAL FOR OFFLINE)
   '/Road-Rage-2d/music/ms1.m4a',
   '/Road-Rage-2d/music/ms2.m4a',
   '/Road-Rage-2d/music/ms3.m4a',
   '/Road-Rage-2d/music/ms4.m4a',
   '/Road-Rage-2d/music/ms5.m4a',
   
-  // Manifest and icons - WITH CORRECT PATHS
+  // MANIFEST AND ICONS
   '/Road-Rage-2d/manifest.json',
   '/Road-Rage-2d/icons/icon-192.png',
-  '/Road-Rage-2d/icons/icon-512.png'
+  '/Road-Rage-2d/icons/icon-512.png',
+  
+  // JAVASCRIPT (if you have separate JS files)
+  '/Road-Rage-2d/game.js' // if exists
 ];
 
-// INSTALL: Cache all game assets
+// ===== INSTALL: CACHE EVERYTHING AGGRESSIVELY =====
 self.addEventListener('install', event => {
-  console.log('[SW] Installing and caching game files...');
+  console.log('🔄 [SW] Installing complete game package...');
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching game assets');
-        return cache.addAll(APP_ASSETS);
-      })
-      .then(() => {
-        console.log('[SW] All assets cached');
-        return self.skipWaiting();
-      })
+    (async () => {
+      // Open cache
+      const cache = await caches.open(CACHE_NAME);
+      console.log('📦 [SW] Cache opened, starting download...');
+      
+      // Show progress (optional)
+      let downloaded = 0;
+      const total = ALL_GAME_ASSETS.length;
+      
+      // Cache ALL assets with retry logic
+      for (const asset of ALL_GAME_ASSETS) {
+        try {
+          console.log(`⬇️ [SW] Downloading: ${asset}`);
+          
+          // For audio files, use special handling
+          if (asset.includes('.m4a')) {
+            // Try multiple times for audio files
+            let success = false;
+            for (let attempt = 0; attempt < 3 && !success; attempt++) {
+              try {
+                const response = await fetch(asset, { 
+                  mode: 'cors',
+                  cache: 'force-cache'
+                });
+                
+                if (response.ok) {
+                  await cache.put(asset, response);
+                  success = true;
+                  console.log(`✅ [SW] Audio cached (attempt ${attempt + 1}): ${asset}`);
+                }
+              } catch (err) {
+                console.warn(`⚠️ [SW] Attempt ${attempt + 1} failed for: ${asset}`);
+              }
+            }
+            
+            if (!success) {
+              console.error(`❌ [SW] Failed to cache: ${asset}`);
+            }
+          } else {
+            // For non-audio files
+            try {
+              await cache.add(asset);
+              console.log(`✅ [SW] Cached: ${asset}`);
+            } catch (err) {
+              console.warn(`⚠️ [SW] Failed: ${asset}`, err);
+            }
+          }
+          
+          downloaded++;
+          
+          // Send progress to client
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({
+                type: 'CACHE_PROGRESS',
+                progress: Math.round((downloaded / total) * 100),
+                current: asset,
+                downloaded: downloaded,
+                total: total
+              });
+            });
+          });
+          
+        } catch (error) {
+          console.error(`💥 [SW] Critical error caching ${asset}:`, error);
+        }
+      }
+      
+      console.log(`🎉 [SW] Installation complete! ${downloaded}/${total} assets cached`);
+      return self.skipWaiting();
+    })()
   );
 });
 
-// ACTIVATE: Clean up old caches
+// ===== ACTIVATE: CLEAN OLD CACHES =====
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating...');
+  console.log('🚀 [SW] Activating new version...');
+  
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName);
+            console.log(`🗑️ [SW] Removing old cache: ${cacheName}`);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('✅ [SW] Ready to serve offline content!');
+      return self.clients.claim();
+    })
   );
 });
 
-// FETCH: Serve cached files when offline
+// ===== FETCH: OFFLINE-FIRST STRATEGY =====
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Special handling for music - allow streaming
-  if (event.request.url.includes('.mp3')) {
+  // Special handling for audio files
+  if (url.pathname.endsWith('.m4a')) {
     event.respondWith(
-      caches.match(event.request)
-        .then(cached => {
-          return cached || fetch(event.request).then(response => {
-            // Cache new music files
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, responseClone);
-            });
-            return response;
-          }).catch(() => {
-            // If music fails, game can still work
-            return new Response('', {status: 404});
+      (async () => {
+        // Try cache first
+        const cached = await caches.match(event.request);
+        if (cached) {
+          console.log(`🎵 [SW] Serving cached audio: ${url.pathname}`);
+          return cached;
+        }
+        
+        // If not in cache, try network but don't wait
+        try {
+          const networkResponse = await fetch(event.request);
+          
+          // Cache for next time
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(event.request, networkResponse.clone());
+          console.log(`💾 [SW] Cached new audio: ${url.pathname}`);
+          
+          return networkResponse;
+        } catch (error) {
+          console.log(`📴 [SW] Audio offline: ${url.pathname}`);
+          // Return empty audio response
+          return new Response('', {
+            status: 200,
+            headers: { 'Content-Type': 'audio/mp4' }
           });
-        })
+        }
+      })()
     );
     return;
   }
   
-  // For all other files
+  // For all other resources
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
+    (async () => {
+      // Try cache first (OFFLINE-FIRST)
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      // If not in cache, try network
+      try {
+        const networkResponse = await fetch(event.request);
+        
+        // Cache successful responses
+        if (networkResponse.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, networkResponse.clone());
         }
         
-        return fetch(event.request)
-          .then(response => {
-            // Don't cache if not valid
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            
-            // Cache the new file
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-            
-            return response;
-          })
-          .catch(() => {
-            // If offline and HTML requested, show offline page
-            if (event.request.mode === 'navigate') {
-              return caches.match(OFFLINE_URL);
-            }
-            return new Response('Game asset not available offline');
-          });
-      })
+        return networkResponse;
+      } catch (error) {
+        // If offline and HTML page requested
+        if (event.request.mode === 'navigate') {
+          return caches.match(OFFLINE_URL);
+        }
+        
+        // For images, return a fallback
+        if (event.request.destination === 'image') {
+          return new Response(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100%" height="100%" fill="#333"/></svg>',
+            { headers: { 'Content-Type': 'image/svg+xml' } }
+          );
+        }
+        
+        // For other files, return empty response
+        return new Response('', { status: 404 });
+      }
+    })()
   );
+});
+
+// ===== MESSAGE HANDLER FOR CACHE STATUS =====
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'CHECK_CACHE') {
+    event.waitUntil(
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const keys = await cache.keys();
+        const audioKeys = keys.filter(key => key.url.includes('.m4a'));
+        
+        event.ports[0].postMessage({
+          type: 'CACHE_STATUS',
+          total: keys.length,
+          audio: audioKeys.length,
+          ready: audioKeys.length >= 5 // At least 5 audio files
+        });
+      })()
+    );
+  }
 });
