@@ -83,10 +83,9 @@
     .overlay {    
       position: absolute; 
       width: 350px;
-      /* Idagdag ang mga ito para sa alignment */
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%); /* Ito ang sikreto sa pag-center */
+      transform: translate(-50%, -50%);
       
       background: rgba(10, 10, 10, 0.85);    
       backdrop-filter: blur(10px);    
@@ -99,7 +98,6 @@
       border-radius: 4px; 
       box-shadow: 0 20px 50px rgba(0,0,0,0.5);    
       
-      /* Siguraduhing flex para pantay-pantay ang loob */
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -519,21 +517,52 @@
       text-align: center;
       min-height: 20px;
     }
+    
+    /* MUSIC TEST BUTTON */
+    #musicTestBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--neon-blue);
+      color: black;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 12px;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <!-- LOADING SCREEN -->
   <div id="loadingScreen">
     <div class="loading-spinner"></div>
-    <h1 style="color: var(--neon-yellow); margin-bottom: 10px;">INSTALLING GAME...</h1>
-    <p id="loadingText">Downloading all game resources</p>
+    <h1 style="color: var(--neon-yellow); margin-bottom: 10px;">ROAD RAGE 2D</h1>
+    <p id="loadingText">Loading game resources...</p>
     <div class="loading-bar">
       <div id="loadingBar" class="loading-bar-fill"></div>
     </div>
     <div id="loadingDetails" class="loading-details">
-      Please wait... This may take a minute
+      Preparing game...
     </div>
+    <button id="forceLoadBtn" style="
+      margin-top: 20px;
+      background: var(--neon-red);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+    " onclick="forceLoadGame()">🚀 FORCE LOAD GAME</button>
   </div>
+
+  <!-- MUSIC TEST BUTTON -->
+  <button id="musicTestBtn" onclick="testMusicManually()">🔊 TEST MUSIC</button>
 
   <!-- PWA INSTALL BUTTON -->
   <button id="installBtn" style="
@@ -681,6 +710,9 @@
     const loadingText = document.getElementById("loadingText");
     const loadingBar = document.getElementById("loadingBar");
     const loadingDetails = document.getElementById("loadingDetails");
+    const forceLoadBtn = document.getElementById("forceLoadBtn");
+    const musicTestBtn = document.getElementById("musicTestBtn");
+    const installBtn = document.getElementById("installBtn");
     
     // ===== GAME STATE VARIABLES =====
     let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
@@ -707,11 +739,6 @@
     let currentCarPage = 0;
     let unlockedCars = [0];
     
-    // ===== INSTALLATION MANAGER =====
-    let installationComplete = false;
-    let deferredPrompt = null;
-    let installCheckInterval = null;
-    
     // ===== MUSIC SYSTEM =====
     const bgTracks = [
       "music/ms1.mp3",
@@ -721,46 +748,12 @@
       "music/ms5.mp3"
     ];
     
-    const bgAudios = bgTracks.map(src => {
-      const a = new Audio(src);
-      a.preload = "auto";
-      a.volume = 0.5;
-      a.setAttribute("playsinline", "");
-      return a;
-    });
-    
+    let bgAudios = [];
     let currentBG = null;
     let lastIndex = -1;
     let musicEnabled = true;
-    
-    // ===== IMAGE PRELOAD =====
-    function preloadImages(srcArray, callback) {
-      let loaded = 0;
-      const images = [];
-      srcArray.forEach(src => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => {
-          loaded++;
-          if (loaded === srcArray.length) callback(images);
-        };
-        images.push(img);
-      });
-    }
-    
-    const imageSources = [
-      "imahe/image2.png", 
-      "imahe/image1.png",
-      "imahe/image3.png",
-      "imahe/image4.png",
-      "imahe/image5.png",
-      "imahe/image6.png",
-      "imahe/image7.png",
-      "imahe/image8.png",
-      "imahe/image9.png"
-    ];
-    
-    let playerImg, enemyImgs;
+    let musicLoaded = false;
+    let musicTested = false;
     
     // ===== SIMPLE MESSAGES =====
     const simpleMessages = [
@@ -873,22 +866,146 @@
       }
     ];
     
+    // ===== MUSIC FUNCTIONS =====
+    function loadMusic() {
+      console.log("🎵 Loading music files...");
+      loadingDetails.textContent = "Loading music (31MB)...";
+      
+      bgAudios = bgTracks.map(src => {
+        const a = new Audio();
+        a.src = src;
+        a.preload = "auto";
+        a.volume = 0.6;
+        a.setAttribute("playsinline", "");
+        
+        // Add error handler
+        a.addEventListener('error', (e) => {
+          console.error(`❌ Failed to load music: ${src}`, e);
+          loadingDetails.textContent = `Failed to load: ${src.split('/').pop()}`;
+        });
+        
+        // Add load handler
+        a.addEventListener('canplaythrough', () => {
+          console.log(`✅ Music loaded: ${src}`);
+        });
+        
+        return a;
+      });
+      
+      // Try to load first track immediately
+      const testAudio = new Audio();
+      testAudio.src = "music/ms1.mp3";
+      testAudio.volume = 0.1;
+      testAudio.preload = "auto";
+      
+      testAudio.addEventListener('canplaythrough', () => {
+        console.log("✅ First music track loaded successfully");
+        musicLoaded = true;
+        loadingDetails.textContent = "Music loaded! Testing playback...";
+        testMusicManually();
+      });
+      
+      testAudio.addEventListener('error', (e) => {
+        console.error("❌ First music track failed to load:", e);
+        loadingDetails.textContent = "Music loading failed. Click FORCE LOAD GAME";
+        forceLoadBtn.style.display = 'block';
+        musicTestBtn.style.display = 'block';
+      });
+      
+      // Load the test audio
+      testAudio.load();
+    }
+    
+    function playRandomBG() {
+      if (!musicEnabled || !musicLoaded) {
+        console.log("⚠️ Music not ready, skipping playback");
+        return;
+      }
+      
+      let index;
+      do {
+        index = Math.floor(Math.random() * bgAudios.length);
+      } while (index === lastIndex && bgAudios.length > 1);
+      
+      lastIndex = index;
+      
+      if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+      }
+      
+      currentBG = bgAudios[index];
+      
+      // Try to play with error handling
+      const playPromise = currentBG.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log(`🎵 Playing: ${bgTracks[index]}`);
+          musicTested = true;
+          musicTestBtn.style.display = 'none';
+        }).catch(e => {
+          console.log("❌ Audio play failed:", e);
+          musicEnabled = false;
+          musicTestBtn.style.display = 'block';
+          showTopMessage("🔇 Click TEST MUSIC button to enable audio");
+        });
+      }
+      
+      currentBG.onended = playRandomBG;
+    }
+    
+    function testMusicManually() {
+      console.log("🔊 Testing music manually...");
+      
+      // Create a new audio element for testing
+      const testAudio = new Audio();
+      testAudio.src = "music/ms1.mp3";
+      testAudio.volume = 0.5;
+      
+      testAudio.play().then(() => {
+        console.log("✅ Music test successful!");
+        musicEnabled = true;
+        musicLoaded = true;
+        musicTested = true;
+        musicTestBtn.style.display = 'none';
+        showTopMessage("🎵 Music enabled!");
+        
+        // Start background music
+        setTimeout(() => {
+          playRandomBG();
+        }, 1000);
+      }).catch(e => {
+        console.error("❌ Manual music test failed:", e);
+        showTopMessage("🔇 Click to enable audio: " + e.message);
+        
+        // Show user interaction instruction
+        const userInteractionMsg = "⚠️ Click anywhere on screen, then click TEST MUSIC again";
+        loadingDetails.textContent = userInteractionMsg;
+        showTopMessage(userInteractionMsg);
+      });
+    }
+    
+    function stopMusic() {
+      if (currentBG) {
+        currentBG.pause();
+        currentBG.currentTime = 0;
+      }
+    }
+    
     // ===== INSTALLATION MANAGER =====
+    let installationComplete = false;
+    let deferredPrompt = null;
+    
     function updateLoadingScreen(percent, mainText, details) {
       if (loadingBar) loadingBar.style.width = percent + '%';
       if (loadingText) loadingText.textContent = mainText;
       if (loadingDetails) loadingDetails.textContent = details;
     }
     
-    function showLoadingMessage(message) {
-      if (loadingText) {
-        loadingText.textContent = message;
-      }
-    }
-    
-    function checkInstallationStatus() {
+    function checkServiceWorkerStatus() {
       if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
-        return Promise.resolve(null);
+        return Promise.resolve({ installed: false, musicFiles: 0 });
       }
       
       return new Promise((resolve) => {
@@ -901,59 +1018,59 @@
         
         messageChannel.port1.onmessage = event => {
           if (event.data.type === 'INSTALLATION_STATUS') {
-            resolve(event.data);
+            resolve({
+              installed: true,
+              musicFiles: event.data.musicFiles,
+              totalFiles: event.data.totalAssets
+            });
           }
         };
         
-        setTimeout(() => resolve(null), 2000);
+        setTimeout(() => resolve({ installed: false, musicFiles: 0 }), 1000);
       });
     }
     
-    function monitorInstallation() {
-      updateLoadingScreen(10, "🚀 Starting installation...", "Connecting to service worker");
+    function startInstallation() {
+      console.log("🚀 Starting game installation...");
+      updateLoadingScreen(10, "Initializing game...", "Loading assets");
       
-      installCheckInterval = setInterval(async () => {
-        const status = await checkInstallationStatus();
+      // Load images first
+      preloadImages(imageSources, (loadedImages) => {
+        console.log("✅ All images loaded");
+        playerImg = loadedImages[0];
+        enemyImgs = loadedImages.slice(1);
+        updateLoadingScreen(50, "Images loaded", "Now loading music...");
         
-        if (!status) {
-          updateLoadingScreen(20, "⚠️ Waiting for service worker...", "Retrying in 2 seconds");
-          return;
-        }
+        // Start loading music
+        loadMusic();
         
-        const progressPercent = Math.round((status.totalAssets / status.totalExpected) * 100);
-        const musicProgress = `${status.musicFiles}/5 music tracks`;
-        const filesProgress = `${status.totalAssets}/${status.totalExpected} files`;
-        
-        updateLoadingScreen(
-          progressPercent, 
-          `Installing: ${progressPercent}%`,
-          `${musicProgress} • ${filesProgress}`
-        );
-        
-        // Check if music is ready
-        if (status.musicFiles >= 5) {
-          updateLoadingScreen(
-            progressPercent, 
-            "🎵 Music package ready!",
-            "Finalizing installation..."
-          );
-        }
-        
-        // Check if installation is complete
-        if (status.totalAssets >= status.totalExpected - 2) { // Allow 2 files margin
-          completeInstallation();
-        }
-      }, 1000);
+        // Check service worker status after a delay
+        setTimeout(async () => {
+          const status = await checkServiceWorkerStatus();
+          
+          if (status.installed) {
+            console.log(`✅ Service Worker: ${status.musicFiles}/5 music files`);
+            updateLoadingScreen(70, "Music package found", `${status.musicFiles}/5 tracks`);
+          } else {
+            console.log("⚠️ Service Worker not active");
+            updateLoadingScreen(60, "Using direct loading", "Music will load on demand");
+          }
+          
+          // Complete loading after music check
+          setTimeout(completeInstallation, 2000);
+        }, 2000);
+      });
     }
     
     function completeInstallation() {
-      clearInterval(installCheckInterval);
+      console.log("✅ Installation complete!");
       installationComplete = true;
       
-      // Show completion message
-      updateLoadingScreen(100, '✅ Installation Complete!', 'All resources downloaded');
+      updateLoadingScreen(100, 'Game Ready!', 'Click FORCE LOAD if music not playing');
+      forceLoadBtn.style.display = 'block';
+      musicTestBtn.style.display = 'block';
       
-      // Hide loading screen after 2 seconds
+      // Hide loading screen after 3 seconds
       setTimeout(() => {
         loadingScreen.style.opacity = '0';
         setTimeout(() => {
@@ -965,35 +1082,46 @@
           // Show install button for PWA
           showPWAInstallButton();
           
-          // Auto-start background music
+          // Show music test button
+          musicTestBtn.style.display = 'block';
+          
+          // Try to play music automatically
           setTimeout(() => {
-            playRandomBG();
+            if (musicLoaded) {
+              playRandomBG();
+            } else {
+              showTopMessage("🔇 Click TEST MUSIC to enable audio");
+            }
           }, 1000);
         }, 500);
-      }, 2000);
+      }, 3000);
+    }
+    
+    function forceLoadGame() {
+      console.log("🚀 Force loading game...");
+      installationComplete = true;
+      musicLoaded = true;
+      
+      loadingScreen.style.display = "none";
+      startBox.style.display = "flex";
+      musicTestBtn.style.display = 'block';
+      
+      showTopMessage("Game force loaded. Click TEST MUSIC for audio");
     }
     
     function showPWAInstallButton() {
       if (deferredPrompt) {
-        const installBtn = document.getElementById('installBtn');
-        if (installBtn) {
-          installBtn.style.display = 'block';
-          installBtn.textContent = '📲 ADD TO HOME SCREEN';
-          
-          // Auto-hide after 30 seconds
-          setTimeout(() => {
-            installBtn.style.display = 'none';
-          }, 30000);
-        }
+        installBtn.style.display = 'block';
+        installBtn.textContent = '📲 ADD TO HOME SCREEN';
+        
+        setTimeout(() => {
+          installBtn.style.display = 'none';
+        }, 30000);
       }
     }
     
     function installGame() {
       if (!deferredPrompt) {
-        if (!installationComplete) {
-          showTopMessage('⏳ Please wait for game installation to complete');
-          return;
-        }
         alert("Installation already completed or not available");
         return;
       }
@@ -1006,9 +1134,7 @@
           showTopMessage('✅ Added to home screen! Launch anytime.');
         }
         deferredPrompt = null;
-        
-        const installBtn = document.getElementById('installBtn');
-        if (installBtn) installBtn.style.display = 'none';
+        installBtn.style.display = 'none';
       });
     }
     
@@ -1017,7 +1143,6 @@
       e.preventDefault();
       deferredPrompt = e;
       
-      // Only show button when installation is complete
       if (installationComplete) {
         showPWAInstallButton();
       }
@@ -1028,36 +1153,36 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')
           .then(registration => {
-            console.log('✅ Service Worker registered for offline play');
-            
-            // Start monitoring installation
-            setTimeout(() => {
-              monitorInstallation();
-            }, 1000);
+            console.log('✅ Service Worker registered:', registration.scope);
           })
           .catch(err => {
-            console.log('❌ Service Worker registration failed:', err);
-            showLoadingMessage('⚠️ Offline mode not available - playing online');
-            // Still continue without service worker
-            setTimeout(() => {
-              completeInstallation();
-            }, 3000);
+            console.log('⚠️ Service Worker failed:', err);
           });
       });
-    } else {
-      // No service worker support
-      setTimeout(() => {
-        completeInstallation();
-      }, 2000);
     }
     
-    // ===== INITIALIZE GAME =====
-    preloadImages(imageSources, (loadedImages) => {
-      playerImg = loadedImages[0];
-      enemyImgs = loadedImages.slice(1);
-      initGame();
-      loop();
-    });
+    // ===== START INSTALLATION =====
+    startInstallation();
+    
+    // ===== IMAGE PRELOAD =====
+    function preloadImages(srcArray, callback) {
+      let loaded = 0;
+      const images = [];
+      srcArray.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+          loaded++;
+          if (loaded === srcArray.length) callback(images);
+        };
+        img.onerror = () => {
+          console.error(`❌ Failed to load image: ${src}`);
+          loaded++;
+          if (loaded === srcArray.length) callback(images);
+        };
+        images.push(img);
+      });
+    }
     
     // ===== INPUT HANDLING =====
     window.addEventListener("keydown", e => {
@@ -1144,7 +1269,7 @@
     
     function startGame() {
       if (!installationComplete) {
-        showTopMessage("⚠️ Please wait for installation to complete");
+        showTopMessage("⚠️ Game still loading...");
         return;
       }
       
@@ -1156,35 +1281,13 @@
       pauseBtn.style.display = "flex";
       pauseBtn.classList.remove("paused");
       
-      playRandomBG();
-    }
-    
-    function playRandomBG() {
-      if (!musicEnabled || !installationComplete) return;
-      
-      let index;
-      do {
-        index = Math.floor(Math.random() * bgAudios.length);
-      } while (index === lastIndex && bgAudios.length > 1);
-      
-      lastIndex = index;
-      
-      if (currentBG) {
-        currentBG.pause();
-        currentBG.currentTime = 0;
+      // Start music if available
+      if (musicLoaded && musicEnabled) {
+        playRandomBG();
+      } else {
+        musicTestBtn.style.display = 'block';
+        showTopMessage("🔇 Click TEST MUSIC for audio");
       }
-      
-      currentBG = bgAudios[index];
-      const playPromise = currentBG.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.log("Audio play failed:", e);
-          musicEnabled = false;
-        });
-      }
-      
-      currentBG.onended = playRandomBG;
     }
     
     function hit(a, b) {
@@ -1300,7 +1403,7 @@
     // ===== CAR SELECTION SYSTEM =====
     function showCarSelection() {
       if (!installationComplete) {
-        showTopMessage("⚠️ Please wait for installation to complete");
+        showTopMessage("⚠️ Game still loading...");
         return;
       }
       
@@ -1409,7 +1512,7 @@
     
     function quickStart() {
       if (!installationComplete) {
-        showTopMessage("⚠️ Please wait for installation to complete");
+        showTopMessage("⚠️ Game still loading...");
         return;
       }
       
@@ -1606,6 +1709,7 @@
     
     document.addEventListener("visibilitychange", handleVisibilityChange);
     
+    // ===== GAME LOOP =====
     function loop() {    
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = "#141414";
@@ -1798,13 +1902,13 @@
       requestAnimationFrame(loop);    
     }
     
-    function stopMusic() {
-      if (currentBG) {
-        currentBG.pause();
-        currentBG.currentTime = 0;
-      }
-    }
+    // ===== START GAME LOOP =====
+    setTimeout(() => {
+      initGame();
+      loop();
+    }, 1000);
     
+    // ===== PREVENT TOUCH SCROLLING =====
     document.addEventListener("touchmove", e => {
       e.preventDefault();
     }, { passive: false });
@@ -1828,4 +1932,4 @@
     }
   </script>
 </body>
-</html>
+      </html>
