@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Offline - Road Rage 2D</title>
+    <style>
+        body { 
+            margin: 0; padding: 40px; 
+            background: #050505; color: white;
+            font-family: sans-serif; text-align: center;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh;
+        }
+        .box { 
+            max-width: 400px; padding: 30px;
+            border: 1px solid #faff00; border-radius: 10px;
+            background: rgba(20,20,20,0.9);
+        }
+        h1 { color: #faff00; }
+        button { 
+            background: #faff00; color: black;
+            border: none; padding: 15px 30px;
+            font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>⚠️ Road Rage 2D is Offline</h1>
+        <p>The game is cached on your device!</p>
+        <p>Connect to internet once to update, then play anytime offline.</p>
+        <button onclick="location.reload()">Retry Connection</button>
+        <button onclick="if('caches' in window) caches.open('road-rage-offline-v1.0').then(c => c.keys().then(keys => alert(keys.length + ' game files cached!')));">Check Cache</button>
+    </div>
+</body>
+</html>
