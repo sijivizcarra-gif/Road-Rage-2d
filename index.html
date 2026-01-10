@@ -687,6 +687,10 @@ preloadImages(imageSources, (loadedImages) => {
     let currentCarPage = 0; // Current car selection page
     let unlockedCars = [0]; // Array of unlocked car indices (start with first car)
 
+    // ===== MUSIC INSTALLATION SYSTEM =====
+    let musicInstallationComplete = false;
+    let deferredPrompt;
+
     // Simple motivational messages (paminsan-minsan lang)
     const simpleMessages = [
       "Miss mo na ba s'ya?",
@@ -912,12 +916,16 @@ preloadImages(imageSources, (loadedImages) => {
     pauseBtn.style.display = "flex"; // Show pause button
     pauseBtn.classList.remove("paused"); // Ensure it shows pause icon
 
-    // Try to play music, but don't fail if blocked
-    try {
-        playRandomBG();
-    } catch (e) {
-        console.log("Music play failed:", e);
-        musicEnabled = false;
+    // Check music installation before playing
+    if (musicInstallationComplete) {
+      try {
+          playRandomBG();
+      } catch (e) {
+          console.log("Music play failed:", e);
+          musicEnabled = false;
+      }
+    } else {
+      showTopMessage("⏳ Music still installing...");
     }
   }
    
@@ -1308,7 +1316,7 @@ preloadImages(imageSources, (loadedImages) => {
                     pauseBtn.classList.remove("paused"); // Change back to pause icon
                     
                     // Resume music
-                    if (currentBG && musicEnabled) {
+                    if (currentBG && musicEnabled && musicInstallationComplete) {
                         currentBG.play().catch(() => {
                             musicEnabled = false;
                         });
@@ -1628,92 +1636,169 @@ preloadImages(imageSources, (loadedImages) => {
 
     window.addEventListener("pagehide", stopMusic);
     window.addEventListener("beforeunload", stopMusic);   
-    // ===== PWA INSTALLATION LOGIC =====
-let deferredPrompt;
-
-// Show install button when possible
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  
-  const installBtn = document.getElementById('installBtn');
-  if (installBtn) {
-    installBtn.style.display = 'block';
     
-    // Auto-hide after 30 seconds
-    setTimeout(() => {
-      installBtn.style.display = 'none';
-    }, 30000);
-  }
-});
-
-function installGame() {
-  if (!deferredPrompt) {
-    alert("Installation not available or already installed");
-    return;
-  }
-  
-  deferredPrompt.prompt();
-  
-  deferredPrompt.userChoice.then(choiceResult => {
-    if (choiceResult.outcome === 'accepted') {
-      console.log('User installed Road Rage 2D');
-      
-      // Show success message in game
-      showTopMessage('✅ Game Installed! Launch from home screen anytime.');
-    }
-    deferredPrompt = null;
-    
-    const installBtn = document.getElementById('installBtn');
-    if (installBtn) installBtn.style.display = 'none';
-  });
-}
-
-// ===== REGISTER SERVICE WORKER =====
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(registration => {
-        console.log('✅ Service Worker registered for offline play:', registration.scope);
+    // ===== AUTO MUSIC INSTALLATION SYSTEM =====
+    // Listen for installation progress from service worker
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data.type === 'INSTALLATION_PROGRESS') {
+          console.log(`📦 ${event.data.progressPercent}%: ${event.data.message}`);
+          
+          // Show installation progress in game
+          showTopMessage(event.data.message);
+          
+          // Update install button based on progress
+          const installBtn = document.getElementById('installBtn');
+          if (installBtn && event.data.progressPercent < 90) {
+            installBtn.style.display = 'none'; // Hide install until ready
+          }
+          
+          // If music is being downloaded, show special message
+          if (event.data.message.includes('Music') || event.data.message.includes('music')) {
+            showTopMessage(`🎵 ${event.data.message}`);
+          }
+        }
         
-        // Check cache status
-        registration.update();
-        
-        // Show cache status in console (optional)
-        caches.open('road-rage-offline-v1.0').then(cache => {
-          cache.keys().then(keys => {
-            console.log(`📦 ${keys.length} game files cached for offline play`);
-            
-            // Show message in game if caching successful
-            if (keys.length > 10) {
-              setTimeout(() => {
-                showTopMessage('✅ Game ready for offline play!');
-              }, 3000);
+        if (event.data.type === 'MUSIC_READY') {
+          console.log('🎵 ' + event.data.message);
+          showTopMessage(event.data.message);
+          musicInstallationComplete = true;
+          
+          // Auto-start music
+          setTimeout(() => {
+            if (musicEnabled && (!currentBG || currentBG.paused)) {
+              playRandomBG();
             }
-          });
-        });
-      })
-      .catch(err => {
-        console.log('❌ Service Worker registration failed:', err);
+          }, 1000);
+          
+          // Show install button when ready
+          const installBtn = document.getElementById('installBtn');
+          if (installBtn) {
+            setTimeout(() => {
+              installBtn.style.display = 'block';
+              installBtn.textContent = '📲 INSTALL GAME (Music Ready)';
+            }, 2000);
+          }
+        }
       });
-  });
-}
-
-// ===== OFFLINE DETECTION =====
-window.addEventListener('online', () => {
-  console.log('🔵 Back online');
-  showTopMessage('✅ Back online - game synced');
-});
-
-window.addEventListener('offline', () => {
-  console.log('⚫ Went offline');
-  showTopMessage('⚫ Offline mode - all good!');
-});
-
-// Check initial connection
-if (!navigator.onLine) {
-  showTopMessage('⚫ Playing offline - all features available');
-}
+    }
+    
+    // ===== CHECK MUSIC INSTALLATION =====
+    function checkMusicInstallation() {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        showTopMessage('⏳ Preparing game installation...');
+        return;
+      }
+      
+      const messageChannel = new MessageChannel();
+      
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'CHECK_INSTALLATION' },
+        [messageChannel.port2]
+      );
+      
+      messageChannel.port1.onmessage = event => {
+        if (event.data.type === 'INSTALLATION_STATUS') {
+          console.log(`📊 Installation: ${event.data.musicFiles}/5 music, ${event.data.totalAssets}/${event.data.totalExpected} total`);
+          
+          if (event.data.musicFiles < 3) {
+            showTopMessage('⏬ Downloading music package (31MB)...');
+          } else if (event.data.musicFiles >= 3 && event.data.musicFiles < 5) {
+            showTopMessage(`🎵 ${event.data.musicFiles}/5 music tracks ready...`);
+          } else if (event.data.musicFiles >= 5) {
+            musicInstallationComplete = true;
+            showTopMessage('✅ All music installed! Game ready.');
+          }
+        }
+      };
+    }
+    
+    // ===== MODIFIED INSTALL GAME BUTTON LOGIC =====
+    function installGame() {
+      if (!deferredPrompt) {
+        if (!musicInstallationComplete) {
+          showTopMessage('⏳ Please wait for music installation to complete...');
+          return;
+        }
+        alert("Installation not available or already installed");
+        return;
+      }
+      
+      deferredPrompt.prompt();
+      
+      deferredPrompt.userChoice.then(choiceResult => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User installed Road Rage 2D with music');
+          showTopMessage('✅ Game + Music installed! Launch from home screen anytime.');
+        }
+        deferredPrompt = null;
+        
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) installBtn.style.display = 'none';
+      });
+    }
+    
+    // ===== PWA INSTALLATION LOGIC =====
+    // Show install button when possible
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      
+      const installBtn = document.getElementById('installBtn');
+      if (installBtn && musicInstallationComplete) {
+        installBtn.style.display = 'block';
+        
+        // Auto-hide after 30 seconds
+        setTimeout(() => {
+          installBtn.style.display = 'none';
+        }, 30000);
+      }
+    });
+    
+    // ===== REGISTER SERVICE WORKER =====
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(registration => {
+            console.log('✅ Service Worker registered for offline play:', registration.scope);
+            
+            // Wait for service worker to be ready
+            registration.addEventListener('updatefound', () => {
+              console.log('🔄 Service worker update found');
+            });
+            
+            // Check installation status after 3 seconds
+            setTimeout(checkMusicInstallation, 3000);
+            
+            // Auto-check every 10 seconds
+            setInterval(() => {
+              if (!musicInstallationComplete) {
+                checkMusicInstallation();
+              }
+            }, 10000);
+          })
+          .catch(err => {
+            console.log('❌ Service Worker registration failed:', err);
+            showTopMessage('⚠️ Offline mode not available');
+          });
+      });
+    }
+    
+    // ===== OFFLINE DETECTION =====
+    window.addEventListener('online', () => {
+      console.log('🔵 Back online');
+      showTopMessage('✅ Back online - game synced');
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('⚫ Went offline');
+      showTopMessage('⚫ Offline mode - all good!');
+    });
+    
+    // Check initial connection
+    if (!navigator.onLine) {
+      showTopMessage('⚫ Playing offline - all features available');
+    }
   </script>
 </body>
   </html>
