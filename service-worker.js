@@ -1,35 +1,35 @@
 // ===== SERVICE WORKER FOR ROAD RAGE 2D =====
-const CACHE_NAME = 'road-rage-offline-v1.0';
-const OFFLINE_URL = 'offline.html';
+const CACHE_NAME = 'road-rage-offline-v1.1';  // ← CHANGED VERSION
+const OFFLINE_URL = '/Road-Rage-2d/offline.html';
 
 // LIST ALL YOUR GAME FILES HERE
 const APP_ASSETS = [
-  // Main files
-  './',
-  './index.html',
+  // Main files - WITH CORRECT PATHS
+  '/Road-Rage-2d/',
+  '/Road-Rage-2d/index.html',
   
-  // All your car images - ADD ALL 9 IMAGES
-  './imahe/image1.png',
-  './imahe/image2.png',
-  './imahe/image3.png',
-  './imahe/image4.png',
-  './imahe/image5.png',
-  './imahe/image6.png',
-  './imahe/image7.png',
-  './imahe/image8.png',
-  './imahe/image9.png',
+  // All your car images - WITH CORRECT PATHS
+  '/Road-Rage-2d/imahe/image1.png',
+  '/Road-Rage-2d/imahe/image2.png',
+  '/Road-Rage-2d/imahe/image3.png',
+  '/Road-Rage-2d/imahe/image4.png',
+  '/Road-Rage-2d/imahe/image5.png',
+  '/Road-Rage-2d/imahe/image6.png',
+  '/Road-Rage-2d/imahe/image7.png',
+  '/Road-Rage-2d/imahe/image8.png',
+  '/Road-Rage-2d/imahe/image9.png',
   
-  // All your music files - ADD ALL 5 TRACKS
-  './music/ms1.mp3',
-  './music/ms2.mp3',
-  './music/ms3.mp3',
-  './music/ms4.mp3',
-  './music/ms5.mp3',
+  // All your music files - WITH CORRECT PATHS
+  '/Road-Rage-2d/music/ms1.mp3',
+  '/Road-Rage-2d/music/ms2.mp3',
+  '/Road-Rage-2d/music/ms3.mp3',
+  '/Road-Rage-2d/music/ms4.mp3',
+  '/Road-Rage-2d/music/ms5.mp3',
   
-  // Manifest and icons
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  // Manifest and icons - WITH CORRECT PATHS
+  '/Road-Rage-2d/manifest.json',
+  '/Road-Rage-2d/icons/icon-192.png',
+  '/Road-Rage-2d/icons/icon-512.png'
 ];
 
 // INSTALL: Cache all game assets
