@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <title>Road Rage 2D - Pro Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- PWA CONFIGURATION -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050505">
+
+<!-- iOS Support -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <style>
     
         :root {    
@@ -456,6 +464,20 @@
   </style>
 </head>
 <body>
+    <button id="installBtn" style="
+    display: none;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: var(--neon-yellow);
+    color: black;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+" onclick="installGame()">📲 Install Game</button>
   <div id="hud">
     <div class="stat-box">
       <div id="bestText">
@@ -1606,6 +1628,92 @@ preloadImages(imageSources, (loadedImages) => {
 
     window.addEventListener("pagehide", stopMusic);
     window.addEventListener("beforeunload", stopMusic);   
+    // ===== PWA INSTALLATION LOGIC =====
+let deferredPrompt;
+
+// Show install button when possible
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) {
+    installBtn.style.display = 'block';
+    
+    // Auto-hide after 30 seconds
+    setTimeout(() => {
+      installBtn.style.display = 'none';
+    }, 30000);
+  }
+});
+
+function installGame() {
+  if (!deferredPrompt) {
+    alert("Installation not available or already installed");
+    return;
+  }
+  
+  deferredPrompt.prompt();
+  
+  deferredPrompt.userChoice.then(choiceResult => {
+    if (choiceResult.outcome === 'accepted') {
+      console.log('User installed Road Rage 2D');
+      
+      // Show success message in game
+      showTopMessage('✅ Game Installed! Launch from home screen anytime.');
+    }
+    deferredPrompt = null;
+    
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) installBtn.style.display = 'none';
+  });
+}
+
+// ===== REGISTER SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => {
+        console.log('✅ Service Worker registered for offline play:', registration.scope);
+        
+        // Check cache status
+        registration.update();
+        
+        // Show cache status in console (optional)
+        caches.open('road-rage-offline-v1.0').then(cache => {
+          cache.keys().then(keys => {
+            console.log(`📦 ${keys.length} game files cached for offline play`);
+            
+            // Show message in game if caching successful
+            if (keys.length > 10) {
+              setTimeout(() => {
+                showTopMessage('✅ Game ready for offline play!');
+              }, 3000);
+            }
+          });
+        });
+      })
+      .catch(err => {
+        console.log('❌ Service Worker registration failed:', err);
+      });
+  });
+}
+
+// ===== OFFLINE DETECTION =====
+window.addEventListener('online', () => {
+  console.log('🔵 Back online');
+  showTopMessage('✅ Back online - game synced');
+});
+
+window.addEventListener('offline', () => {
+  console.log('⚫ Went offline');
+  showTopMessage('⚫ Offline mode - all good!');
+});
+
+// Check initial connection
+if (!navigator.onLine) {
+  showTopMessage('⚫ Playing offline - all features available');
+}
   </script>
 </body>
   </html>
