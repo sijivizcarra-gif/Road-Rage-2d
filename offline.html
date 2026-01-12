@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Offline - Road Rage 2D</title>
@@ -7,265 +7,1046 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#050505">
     <style>
-        body { 
-            margin: 0; padding: 20px; 
-            background: #050505; color: white;
-            font-family: sans-serif; text-align: center;
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh;
+        :root {
+            --neon-yellow: #faff00;
+            --neon-blue: #00f2ff;
+            --neon-red: #ff3131;
+            --bg-dark: #050505;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        .container { 
-            max-width: 400px; padding: 30px;
-            border: 2px solid #faff00; border-radius: 10px;
-            background: rgba(20,20,20,0.9);
-            box-shadow: 0 0 30px rgba(250, 255, 0, 0.2);
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        h1 { color: #faff00; margin-top: 0; }
-        .status-box {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: left;
+        
+        .main-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
         }
+        
+        .offline-box {
+            border: 2px solid var(--neon-yellow);
+            border-radius: 15px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px 25px;
+            box-shadow: 0 0 40px rgba(250, 255, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .offline-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--neon-yellow), var(--neon-blue));
+        }
+        
+        .offline-icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            filter: drop-shadow(0 0 15px rgba(250, 255, 0, 0.5));
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.9; }
+        }
+        
+        h1 {
+            color: var(--neon-yellow);
+            margin-bottom: 15px;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(250, 255, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .status-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--neon-blue);
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
         .status-item {
             display: flex;
             justify-content: space-between;
-            margin: 8px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
         .status-label {
-            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ccc;
+            font-size: 14px;
         }
+        
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
         .status-value {
             font-weight: bold;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            min-width: 80px;
+            text-align: center;
         }
+        
         .status-value.good {
+            background: rgba(0, 255, 0, 0.15);
             color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.3);
         }
+        
         .status-value.warning {
+            background: rgba(255, 255, 0, 0.15);
             color: #ffff00;
+            border: 1px solid rgba(255, 255, 0, 0.3);
         }
+        
         .status-value.bad {
-            color: #ff0000;
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff6464;
+            border: 1px solid rgba(255, 0, 0, 0.3);
         }
-        button { 
-            background: #faff00; color: black;
-            border: none; padding: 15px 30px;
-            font-size: 16px; font-weight: bold;
-            cursor: pointer; margin: 10px 0;
-            width: 100%;
-            border-radius: 5px;
-            transition: transform 0.2s;
+        
+        .status-value.info {
+            background: rgba(0, 200, 255, 0.15);
+            color: var(--neon-blue);
+            border: 1px solid rgba(0, 200, 255, 0.3);
         }
-        button:hover {
-            transform: scale(1.05);
-            background: white;
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
         }
+        
+        .info-card {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--neon-yellow);
+        }
+        
+        .info-text {
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
         .button-container {
             display: flex;
             flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .offline-btn {
+            background: var(--neon-yellow);
+            color: black;
+            border: none;
+            padding: 18px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+        }
+        
+        .offline-btn:hover {
+            transform: scale(1.05);
+            background: white;
+            box-shadow: 0 0 20px rgba(250, 255, 0, 0.5);
+        }
+        
+        .offline-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .offline-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .offline-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .offline-btn.danger {
+            background: rgba(255, 100, 100, 0.15);
+            color: #ff6464;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+        }
+        
+        .offline-btn.danger:hover {
+            background: rgba(255, 100, 100, 0.25);
+            border-color: rgba(255, 100, 100, 0.5);
+        }
+        
+        .btn-icon {
+            font-size: 20px;
+        }
+        
+        .connection-status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .connection-status.online {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+        }
+        
+        .connection-status.offline {
+            background: rgba(255, 100, 100, 0.1);
+            color: #ff6464;
+            border: 1px solid rgba(255, 100, 100, 0.2);
+        }
+        
+        .progress-container {
+            margin: 25px 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 14px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-yellow), var(--neon-blue));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .game-ready-banner {
+            background: linear-gradient(90deg, rgba(0, 255, 0, 0.1), rgba(0, 200, 255, 0.1));
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(0, 255, 0, 0.3); }
+            to { box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); }
+        }
+        
+        .game-ready-banner h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .game-ready-banner p {
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .cache-actions {
+            display: flex;
             gap: 10px;
             margin-top: 20px;
         }
-        .offline-icon {
-            font-size: 50px;
-            margin-bottom: 20px;
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .info-text {
-            color: #aaa;
-            font-size: 14px;
-            margin: 10px 0;
-            line-height: 1.5;
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .offline-box {
+                padding: 25px 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .status-value {
+                align-self: flex-start;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Safe area for notch devices */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: max(20px, env(safe-area-inset-top));
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="offline-icon">⚠️</div>
-        <h1>Road Rage 2D is Offline</h1>
-        <p>The game is cached on your device!</p>
-        <p>Connect to internet once to update, then play anytime offline.</p>
-        
-        <div class="status-box" id="cacheStatus">
-            <div class="status-item">
-                <span class="status-label">Connection Status:</span>
-                <span class="status-value" id="connectionStatus">Checking...</span>
+    <div class="main-container">
+        <div class="offline-box">
+            <div class="offline-icon">⚠️</div>
+            
+            <h1>Road Rage 2D</h1>
+            <p class="subtitle">The game is cached on your device! Connect to internet once to update, then play anytime offline.</p>
+            
+            <div class="connection-status" id="connectionStatus">
+                <span class="connection-icon">🌐</span>
+                <span class="connection-text">Checking connection...</span>
             </div>
-            <div class="status-item">
-                <span class="status-label">Cached Game Files:</span>
-                <span class="status-value" id="cachedFiles">Checking...</span>
+            
+            <div class="status-container">
+                <div class="status-header">
+                    <span>📦</span>
+                    <span>GAME CACHE STATUS</span>
+                </div>
+                
+                <div class="status-grid" id="statusGrid">
+                    <!-- Status items will be populated by JavaScript -->
+                </div>
+                
+                <div class="progress-container" id="progressContainer" style="display: none;">
+                    <div class="progress-label">
+                        <span>Cache Progress</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
-            <div class="status-item">
-                <span class="status-label">Car Images:</span>
-                <span class="status-value" id="carImages">Checking...</span>
+            
+            <div id="gameReadyBanner" class="game-ready-banner" style="display: none;">
+                <h3>✅ GAME READY OFFLINE!</h3>
+                <p>All game files are cached. You can play without internet connection.</p>
             </div>
-            <div class="status-item">
-                <span class="status-label">Music Tracks:</span>
-                <span class="status-value" id="musicTracks">Checking...</span>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">🎮</div>
+                    <p class="info-text">Game can run completely offline once cached</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">📱</div>
+                    <p class="info-text">Add to Home Screen for instant access</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">⚡</div>
+                    <p class="info-text">No internet required after first load</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon">💾</div>
+                    <p class="info-text">Scores saved locally, sync when online</p>
+                </div>
             </div>
-            <div class="status-item">
-                <span class="status-label">Game Ready:</span>
-                <span class="status-value" id="gameReady">Checking...</span>
+            
+            <div class="button-container">
+                <button class="offline-btn" onclick="goToGame()" id="playButton">
+                    <span class="btn-icon">🎮</span>
+                    <span>LOAD GAME</span>
+                </button>
+                
+                <button class="offline-btn secondary" onclick="checkCache()">
+                    <span class="btn-icon">🔄</span>
+                    <span>REFRESH CACHE STATUS</span>
+                </button>
+                
+                <button class="offline-btn secondary" onclick="location.reload()">
+                    <span class="btn-icon">↻</span>
+                    <span>RETRY CONNECTION</span>
+                </button>
+                
+                <div class="cache-actions">
+                    <button class="action-btn" onclick="forceCacheUpdate()">
+                        <span>🔄</span>
+                        <span>Force Update</span>
+                    </button>
+                    <button class="action-btn danger" onclick="clearCache()">
+                        <span>🗑️</span>
+                        <span>Clear Cache</span>
+                    </button>
+                </div>
             </div>
-        </div>
-        
-        <p class="info-text">🎮 Game can run completely offline once cached</p>
-        <p class="info-text">📱 Add to Home Screen for instant access</p>
-        <p class="info-text">⚡ No internet required after first load</p>
-        
-        <div class="button-container">
-            <button onclick="location.reload()">↻ Retry Connection</button>
-            <button onclick="checkCache()">📦 Refresh Cache Status</button>
-            <button onclick="goToGame()" id="playButton">🎮 Try Load Game</button>
-            <button onclick="clearCache()" style="background: rgba(255,100,100,0.2); color: #ff6464;">🗑️ Clear Cache</button>
+            
+            <div class="pwa-info" style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <p style="color: #aaa; font-size: 13px; line-height: 1.5;">
+                    <strong>💡 Tip:</strong> For best experience, add this game to your home screen.
+                    It will launch like a native app and work even without internet connection.
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
-        let cacheStatus = {
+        // Cache status object
+        const cacheStatus = {
             total: 0,
             images: 0,
             music: 0,
             html: 0,
-            ready: false
+            icons: 0,
+            manifest: false,
+            ready: false,
+            gameFiles: 0,
+            totalFiles: 21, // Total files that should be cached
+            version: 'unknown'
         };
         
+        // Update connection status display
+        function updateConnectionStatus() {
+            const connectionStatus = document.getElementById('connectionStatus');
+            const isOnline = navigator.onLine;
+            
+            if (isOnline) {
+                connectionStatus.className = 'connection-status online';
+                connectionStatus.innerHTML = `
+                    <span class="connection-icon">🌐</span>
+                    <span class="connection-text">Online - Caching in background</span>
+                `;
+            } else {
+                connectionStatus.className = 'connection-status offline';
+                connectionStatus.innerHTML = `
+                    <span class="connection-icon">⚫</span>
+                    <span class="connection-text">Offline - Using cached version</span>
+                `;
+            }
+        }
+        
+        // Update status display
         function updateStatusDisplay() {
-            document.getElementById('connectionStatus').textContent = 
-                navigator.onLine ? '🌐 Online' : '⚫ Offline';
-            document.getElementById('connectionStatus').className = 
-                'status-value ' + (navigator.onLine ? 'good' : 'warning');
-            
-            document.getElementById('cachedFiles').textContent = cacheStatus.total + ' files';
-            document.getElementById('cachedFiles').className = 'status-value ' + 
-                (cacheStatus.total > 15 ? 'good' : cacheStatus.total > 5 ? 'warning' : 'bad');
-            
-            document.getElementById('carImages').textContent = cacheStatus.images + '/9';
-            document.getElementById('carImages').className = 'status-value ' + 
-                (cacheStatus.images >= 9 ? 'good' : cacheStatus.images >= 5 ? 'warning' : 'bad');
-            
-            document.getElementById('musicTracks').textContent = cacheStatus.music + '/5';
-            document.getElementById('musicTracks').className = 'status-value ' + 
-                (cacheStatus.music >= 5 ? 'good' : cacheStatus.music >= 2 ? 'warning' : 'bad');
-            
-            const gameReady = cacheStatus.images >= 9 && cacheStatus.music >= 5;
-            document.getElementById('gameReady').textContent = gameReady ? '✅ YES' : '❌ NO';
-            document.getElementById('gameReady').className = 'status-value ' + (gameReady ? 'good' : 'bad');
-            
+            const statusGrid = document.getElementById('statusGrid');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            const gameReadyBanner = document.getElementById('gameReadyBanner');
             const playButton = document.getElementById('playButton');
-            if (gameReady) {
-                playButton.innerHTML = '🎮 PLAY OFFLINE';
-                playButton.style.background = '#00ff00';
+            
+            // Calculate cache completion percentage
+            const totalExpected = cacheStatus.totalFiles;
+            const totalCached = cacheStatus.total;
+            const completionPercentage = Math.min(100, Math.round((totalCached / totalExpected) * 100));
+            
+            // Update progress bar
+            if (completionPercentage > 0 && completionPercentage < 100) {
+                progressContainer.style.display = 'block';
+                progressFill.style.width = completionPercentage + '%';
+                progressPercent.textContent = completionPercentage + '%';
+            } else {
+                progressContainer.style.display = 'none';
+            }
+            
+            // Determine status classes
+            const getStatusClass = (current, required) => {
+                if (current >= required) return 'good';
+                if (current >= required * 0.7) return 'warning';
+                return 'bad';
+            };
+            
+            const getConnectionClass = () => {
+                return navigator.onLine ? 'info' : 'warning';
+            };
+            
+            // Update status grid
+            statusGrid.innerHTML = `
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">📁</span>
+                        <span>Total Cached Files</span>
+                    </div>
+                    <div class="status-value ${getStatusClass(cacheStatus.total, 15)}">
+                        ${cacheStatus.total}/${cacheStatus.totalFiles}
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">🚗</span>
+                        <span>Car Images</span>
+                    </div>
+                    <div class="status-value ${getStatusClass(cacheStatus.images, 9)}">
+                        ${cacheStatus.images}/9
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">🎵</span>
+                        <span>Music Tracks</span>
+                    </div>
+                    <div class="status-value ${getStatusClass(cacheStatus.music, 5)}">
+                        ${cacheStatus.music}/5
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">📄</span>
+                        <span>Game Pages</span>
+                    </div>
+                    <div class="status-value ${getStatusClass(cacheStatus.html, 2)}">
+                        ${cacheStatus.html}/2
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">🖼️</span>
+                        <span>App Icons</span>
+                    </div>
+                    <div class="status-value ${getStatusClass(cacheStatus.icons, 8)}">
+                        ${cacheStatus.icons}/8
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">⚡</span>
+                        <span>Connection</span>
+                    </div>
+                    <div class="status-value ${getConnectionClass()}">
+                        ${navigator.onLine ? '🌐 Online' : '⚫ Offline'}
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">
+                        <span class="status-icon">🎮</span>
+                        <span>Game Ready</span>
+                    </div>
+                    <div class="status-value ${cacheStatus.ready ? 'good' : 'bad'}">
+                        ${cacheStatus.ready ? '✅ YES' : '❌ NO'}
+                    </div>
+                </div>
+            `;
+            
+            // Update game ready banner
+            if (cacheStatus.ready) {
+                gameReadyBanner.style.display = 'block';
+                playButton.innerHTML = `
+                    <span class="btn-icon">🎮</span>
+                    <span>PLAY OFFLINE NOW</span>
+                `;
+                playButton.style.background = 'linear-gradient(90deg, #00ff00, #00cc00)';
                 playButton.style.color = 'black';
             } else {
-                playButton.innerHTML = '🎮 Try Load Game';
-                playButton.style.background = '#faff00';
-                playButton.style.color = 'black';
+                gameReadyBanner.style.display = 'none';
+                playButton.innerHTML = `
+                    <span class="btn-icon">🎮</span>
+                    <span>TRY LOAD GAME</span>
+                `;
+                playButton.style.background = '';
+                playButton.style.color = '';
             }
         }
         
-        function checkCache() {
-            if ('caches' in window) {
-                caches.open('road-rage-pro-v2.2').then(cache => {
-                    return cache.keys();
-                }).then(keys => {
-                    cacheStatus.total = keys.length;
-                    cacheStatus.images = keys.filter(k => k.url.includes('imahe/')).length;
-                    cacheStatus.music = keys.filter(k => k.url.includes('music/')).length;
-                    cacheStatus.html = keys.filter(k => k.url.includes('.html')).length;
-                    cacheStatus.ready = cacheStatus.images >= 9 && cacheStatus.music >= 5;
-                    
-                    updateStatusDisplay();
-                    
-                    // Show summary alert
-                    if (cacheStatus.ready) {
-                        setTimeout(() => {
-                            alert(`🎮 ROAD RAGE 2D - OFFLINE READY!\n\n` +
-                                  `📁 Total Files: ${cacheStatus.total}\n` +
-                                  `🚗 Car Images: ${cacheStatus.images}/9 ✅\n` +
-                                  `🎵 Music Tracks: ${cacheStatus.music}/5 ✅\n` +
-                                  `Status: FULLY READY OFFLINE!\n\n` +
-                                  `You can play the game without internet!`);
-                        }, 500);
-                    } else {
-                        setTimeout(() => {
-                            alert(`🎮 ROAD RAGE 2D - CACHE STATUS\n\n` +
-                                  `📁 Total Files: ${cacheStatus.total}\n` +
-                                  `🚗 Car Images: ${cacheStatus.images}/9 ${cacheStatus.images >= 9 ? '✅' : '❌'}\n` +
-                                  `🎵 Music Tracks: ${cacheStatus.music}/5 ${cacheStatus.music >= 5 ? '✅' : '❌'}\n` +
-                                  `Status: ${cacheStatus.images >= 9 && cacheStatus.music >= 5 ? 
-                                    'FULLY READY' : 'NEEDS INTERNET'}\n\n` +
-                                  `${!navigator.onLine ? 'Connect to internet to cache missing files.' : 
-                                    'Files are being cached in background.'}`);
-                        }, 500);
+        // Check cache status
+        async function checkCache() {
+            if (!('caches' in window)) {
+                alert('❌ Cache API not supported in this browser.\n\nPlease use Chrome, Edge, Firefox, or Safari.');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                const playButton = document.getElementById('playButton');
+                const originalText = playButton.innerHTML;
+                playButton.innerHTML = `
+                    <span class="btn-icon">⏳</span>
+                    <span>CHECKING CACHE...</span>
+                `;
+                playButton.disabled = true;
+                
+                // Open cache
+                const cache = await caches.open('road-rage-pro-v2.2');
+                const keys = await cache.keys();
+                
+                // Reset cache status
+                cacheStatus.total = keys.length;
+                cacheStatus.images = keys.filter(k => k.url.includes('imahe/')).length;
+                cacheStatus.music = keys.filter(k => k.url.includes('music/')).length;
+                cacheStatus.html = keys.filter(k => k.url.includes('.html')).length;
+                cacheStatus.icons = keys.filter(k => k.url.includes('icons/')).length;
+                cacheStatus.manifest = keys.some(k => k.url.includes('manifest.json'));
+                
+                // Check if game is ready (at least 9 images and 5 music files)
+                cacheStatus.ready = cacheStatus.images >= 9 && cacheStatus.music >= 5;
+                
+                // Get service worker version if available
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration && registration.active) {
+                        cacheStatus.version = '2.2';
                     }
-                }).catch(err => {
-                    console.log('Cache check failed:', err);
-                    cacheStatus.total = 0;
-                    cacheStatus.images = 0;
-                    cacheStatus.music = 0;
-                    cacheStatus.ready = false;
-                    updateStatusDisplay();
-                    alert('Cache check failed. The game may not be installed yet.');
-                });
-            } else {
-                alert('Cache API not supported in this browser.');
+                }
+                
+                // Update displays
+                updateConnectionStatus();
+                updateStatusDisplay();
+                
+                // Restore button
+                playButton.innerHTML = originalText;
+                playButton.disabled = false;
+                
+                // Show summary
+                const summary = `
+🎮 ROAD RAGE 2D - CACHE STATUS
+
+📁 Total Files: ${cacheStatus.total}/${cacheStatus.totalFiles}
+🚗 Car Images: ${cacheStatus.images}/9 ${cacheStatus.images >= 9 ? '✅' : '❌'}
+🎵 Music Tracks: ${cacheStatus.music}/5 ${cacheStatus.music >= 5 ? '✅' : '❌'}
+📄 Game Pages: ${cacheStatus.html}/2 ${cacheStatus.html >= 2 ? '✅' : '❌'}
+🖼️ App Icons: ${cacheStatus.icons}/8 ${cacheStatus.icons >= 8 ? '✅' : '❌'}
+🌐 Connection: ${navigator.onLine ? 'Online' : 'Offline'}
+
+STATUS: ${cacheStatus.ready ? '✅ FULLY READY OFFLINE!' : '⚠️ PARTIALLY CACHED'}
+
+${cacheStatus.ready ? 
+    '🎉 Game is ready to play offline!' : 
+    !navigator.onLine ? 
+        'Connect to internet to download missing files.' : 
+        'Files are being cached in background.'}
+                `;
+                
+                console.log('Cache check complete:', summary);
+                
+                if (cacheStatus.ready) {
+                    showNotification('✅ Game ready for offline play!');
+                }
+                
+            } catch (error) {
+                console.error('Cache check failed:', error);
+                
+                // Reset to default values
+                cacheStatus.total = 0;
+                cacheStatus.images = 0;
+                cacheStatus.music = 0;
+                cacheStatus.html = 0;
+                cacheStatus.icons = 0;
+                cacheStatus.ready = false;
+                
+                updateStatusDisplay();
+                
+                alert('❌ Cache check failed. The game may not be installed yet.\n\nError: ' + error.message);
+                
+                // Restore button
+                const playButton = document.getElementById('playButton');
+                playButton.innerHTML = `
+                    <span class="btn-icon">🎮</span>
+                    <span>TRY LOAD GAME</span>
+                `;
+                playButton.disabled = false;
             }
         }
         
+        // Go to game
         function goToGame() {
             if (cacheStatus.ready) {
                 window.location.href = './index.html';
             } else {
-                const shouldTry = confirm('Game may not be fully cached.\n' +
-                    'Some features might not work offline.\n' +
-                    'Try loading anyway?');
+                const shouldTry = confirm(
+                    '⚠️ Game may not be fully cached.\n\n' +
+                    'Some features might not work offline:\n' +
+                    `• Car Images: ${cacheStatus.images}/9\n` +
+                    `• Music Tracks: ${cacheStatus.music}/5\n\n` +
+                    'Try loading anyway?\n\n' +
+                    (navigator.onLine ? 
+                        '✅ You are online - missing files will download.' :
+                        '⚫ You are offline - game may be incomplete.')
+                );
+                
                 if (shouldTry) {
                     window.location.href = './index.html';
                 }
             }
         }
         
-        function clearCache() {
-            if (confirm('Are you sure you want to clear the game cache?\n' +
-                       'You will need internet connection to download the game again.')) {
-                if ('caches' in window) {
-                    caches.delete('road-rage-pro-v2.2').then(() => {
-                        alert('Cache cleared! Refresh page to see changes.');
-                        checkCache();
-                    });
-                } else {
-                    alert('Cache API not available.');
+        // Clear cache
+        async function clearCache() {
+            const confirmClear = confirm(
+                '🗑️ CLEAR GAME CACHE\n\n' +
+                'Are you sure you want to clear the game cache?\n\n' +
+                '⚠️ This will remove all cached game files.\n' +
+                '⚠️ You will need internet connection to download the game again.\n' +
+                '⚠️ Your high scores will NOT be affected.\n\n' +
+                'Proceed with clearing cache?'
+            );
+            
+            if (!confirmClear) return;
+            
+            try {
+                // Show clearing state
+                const playButton = document.getElementById('playButton');
+                const originalText = playButton.innerHTML;
+                playButton.innerHTML = `
+                    <span class="btn-icon">⏳</span>
+                    <span>CLEARING CACHE...</span>
+                `;
+                playButton.disabled = true;
+                
+                // Clear cache
+                await caches.delete('road-rage-pro-v2.2');
+                
+                // Reset status
+                cacheStatus.total = 0;
+                cacheStatus.images = 0;
+                cacheStatus.music = 0;
+                cacheStatus.html = 0;
+                cacheStatus.icons = 0;
+                cacheStatus.ready = false;
+                
+                // Update display
+                updateStatusDisplay();
+                
+                // Show success message
+                showNotification('✅ Cache cleared successfully!');
+                
+                // Check if we should reload
+                if (navigator.onLine) {
+                    setTimeout(() => {
+                        const reload = confirm(
+                            'Cache cleared successfully!\n\n' +
+                            'Do you want to reload the page to start fresh caching?\n\n' +
+                            '✅ You are online - game will re-cache automatically.'
+                        );
+                        
+                        if (reload) {
+                            location.reload();
+                        }
+                    }, 500);
                 }
+                
+                // Restore button
+                playButton.innerHTML = originalText;
+                playButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Failed to clear cache:', error);
+                alert('❌ Failed to clear cache: ' + error.message);
+                
+                // Restore button
+                const playButton = document.getElementById('playButton');
+                playButton.innerHTML = originalText;
+                playButton.disabled = false;
             }
         }
         
-        // Auto-check on page load
-        window.addEventListener('load', function() {
-            console.log('Offline page loaded');
-            checkCache();
-            
-            // Check connection
-            if (navigator.onLine) {
-                console.log('Device is online - caching in background');
-            } else {
-                console.log('Device is offline - using cached version');
+        // Force cache update
+        async function forceCacheUpdate() {
+            if (!navigator.onLine) {
+                alert('⚠️ You need to be online to update cache.');
+                return;
             }
+            
+            try {
+                // Show updating state
+                const playButton = document.getElementById('playButton');
+                const originalText = playButton.innerHTML;
+                playButton.innerHTML = `
+                    <span class="btn-icon">⏳</span>
+                    <span>UPDATING CACHE...</span>
+                `;
+                playButton.disabled = true;
+                
+                // Unregister and re-register service worker
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    
+                    if (registration) {
+                        await registration.unregister();
+                        console.log('Service Worker unregistered');
+                    }
+                    
+                    // Wait a bit then reload
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Service Worker not available');
+                    playButton.innerHTML = originalText;
+                    playButton.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Force update failed:', error);
+                alert('❌ Update failed: ' + error.message);
+                
+                // Restore button
+                const playButton = document.getElementById('playButton');
+                playButton.innerHTML = originalText;
+                playButton.disabled = false;
+            }
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(20, 20, 20, 0.95);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                border-left: 5px solid var(--neon-yellow);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+                backdrop-filter: blur(10px);
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">📢</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Add animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize on page load
+        window.addEventListener('load', async function() {
+            console.log('Offline page loaded');
+            
+            // Initial connection status
+            updateConnectionStatus();
+            
+            // Initial cache check
+            await checkCache();
             
             // Listen for online/offline events
             window.addEventListener('online', () => {
-                console.log('Came back online');
-                checkCache();
+                console.log('Device came online');
+                updateConnectionStatus();
+                showNotification('🌐 Back online - caching updates');
+                setTimeout(checkCache, 1000);
             });
             
             window.addEventListener('offline', () => {
-                console.log('Went offline');
-                checkCache();
+                console.log('Device went offline');
+                updateConnectionStatus();
+                showNotification('⚫ Offline - using cached version');
             });
+            
+            // Listen for service worker messages
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data && event.data.type === 'CACHE_STATUS') {
+                        console.log('Received cache status from SW:', event.data.data);
+                        
+                        // Update cache status from service worker
+                        const swData = event.data.data;
+                        cacheStatus.total = swData.total || cacheStatus.total;
+                        cacheStatus.images = swData.images || cacheStatus.images;
+                        cacheStatus.music = swData.music || cacheStatus.music;
+                        cacheStatus.ready = swData.ready || cacheStatus.ready;
+                        
+                        updateStatusDisplay();
+                    }
+                    
+                    if (event.data && event.data.type === 'SW_ACTIVATED') {
+                        console.log('Service Worker activated:', event.data);
+                        showNotification('✅ Game cache updated!');
+                        setTimeout(checkCache, 1000);
+                    }
+                });
+                
+                // Request cache status from service worker
+                setTimeout(() => {
+                    navigator.serviceWorker.controller.postMessage({ type: 'CHECK_CACHE' });
+                }, 2000);
+            }
+            
+            // Check for PWA install
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('PWA install available');
+                // You could show an install button here if needed
+            });
+            
+            // Handle page visibility
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    // Page became visible, refresh cache status
+                    setTimeout(checkCache, 500);
+                }
+            });
+        });
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+R or Cmd+R to refresh cache
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                checkCache();
+            }
+            
+            // F5 to refresh
+            if (e.key === 'F5') {
+                e.preventDefault();
+                location.reload();
+            }
+            
+            // Enter to go to game
+            if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                goToGame();
+            }
         });
     </script>
 </body>
-</html>
+                        </html>
