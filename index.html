@@ -36,8 +36,7 @@
         position: relative;
         width: 100%;
         height: 100%;
-        max-width: 500px;
-        max-height: 800px;
+        /* REMOVED fixed max-width/height - Now responsive */
         overflow: hidden;
     }
     
@@ -64,14 +63,14 @@
     }    
     .stat-box { margin-bottom: 8px; }    
     #bestText { 
-        font-size: 11px; 
+        font-size: clamp(10px, 2vw, 12px); 
         text-transform: uppercase; 
         letter-spacing: 1px; 
         opacity: 0.7; 
         margin-bottom: 2px;
     }    
     #scoreText { 
-        font-size: 28px; 
+        font-size: clamp(20px, 6vw, 32px); 
         font-weight: 900; 
         color: var(--neon-yellow); 
         text-shadow: 0 0 8px rgba(250,255,0,0.5);
@@ -80,7 +79,7 @@
     
     #powerContainer { margin-top: 10px; }    
     #powerBar {    
-        width: 120px; 
+        width: clamp(100px, 20vw, 140px); 
         height: 4px; 
         background: rgba(255,255,255,0.1);    
         border-radius: 2px; 
@@ -95,7 +94,7 @@
         transition: width 0.1s; 
     }    
     #powerText {    
-        font-size: 11px; 
+        font-size: clamp(10px, 2vw, 12px); 
         color: var(--neon-blue); 
         margin-top: 4px; 
         text-transform: uppercase; 
@@ -127,7 +126,7 @@
     }
 
     h1 { 
-        font-size: clamp(1.8rem, 5vw, 2.5rem); 
+        font-size: clamp(1.5rem, 5vw, 2.5rem); 
         margin: 0 0 20px 0; 
         letter-spacing: -1px; 
         font-style: italic; 
@@ -190,8 +189,8 @@
         background: transparent;
         border: none;
         color: var(--neon-blue);
-        width: 40px;
-        height: 40px;
+        width: clamp(35px, 8vw, 45px);
+        height: clamp(35px, 8vw, 45px);
         cursor: pointer;
         font-size: 0;
         display: none;
@@ -276,7 +275,7 @@
         color: var(--neon-red);
         padding: 4px 8px;
         border-radius: 3px;
-        font-size: 10px;
+        font-size: clamp(9px, 2vw, 11px);
         text-transform: uppercase;
         letter-spacing: 0.5px;
         display: none;
@@ -286,10 +285,10 @@
 
     .top-message {
         position: absolute;
-        top: 150px;
+        top: clamp(100px, 20vh, 150px);
         left: 50%;
         transform: translateX(-50%);
-        font-size: clamp(14px, 4vw, 16px);
+        font-size: clamp(14px, 4vw, 18px);
         font-weight: 500;
         text-align: center;
         color: white;
@@ -372,15 +371,15 @@
     .car-option.locked::after { content: "🔒"; position: absolute; top: 8px; right: 8px; font-size: 14px; }
 
     .car-preview {
-        width: 60px;
-        height: 40px;
+        width: clamp(50px, 12vw, 70px);
+        height: clamp(30px, 8vw, 45px);
         object-fit: contain;
         margin-bottom: 8px;
         filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
     }
 
     .car-name {
-        font-size: 11px;
+        font-size: clamp(10px, 2.5vw, 12px);
         font-weight: bold;
         margin-bottom: 5px;
         text-transform: uppercase;
@@ -388,14 +387,14 @@
     }
 
     .car-simple-stats {
-        font-size: 10px;
+        font-size: clamp(9px, 2vw, 11px);
         color: #aaa;
         margin-top: 5px;
         text-align: center;
     }
 
     .car-unlock-req {
-        font-size: 8px;
+        font-size: clamp(8px, 1.8vw, 10px);
         color: var(--neon-yellow);
         margin-top: 5px;
         font-style: italic;
@@ -414,11 +413,11 @@
         background: rgba(255,255,255,0.1);
         border: none;
         color: white;
-        width: 35px;
-        height: 35px;
+        width: clamp(30px, 8vw, 40px);
+        height: clamp(30px, 8vw, 40px);
         border-radius: 50%;
         cursor: pointer;
-        font-size: 16px;
+        font-size: clamp(14px, 3vw, 18px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -429,8 +428,8 @@
     .nav-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
 
     .car-preview-container {
-        width: 180px;
-        height: 100px;
+        width: clamp(150px, 40vw, 200px);
+        height: clamp(80px, 25vh, 120px);
         background: rgba(20, 20, 20, 0.5);
         border-radius: 8px;
         margin: 15px 0;
@@ -442,8 +441,8 @@
     }
 
     .selected-car-preview {
-        width: 140px;
-        height: 80px;
+        width: clamp(120px, 35vw, 170px);
+        height: clamp(60px, 20vh, 100px);
         object-fit: contain;
         filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
     }
@@ -469,40 +468,15 @@
         bottom: 15px;
         left: 15px;
         color: #00ff00;
-        font-size: 12px;
+        font-size: clamp(10px, 2vw, 12px);
         font-family: monospace;
         z-index: 30;
         display: none;
     }
 
+    /* REMOVED orientation warning - game works in both orientations */
     #orientationWarning {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 1000;
-        color: white;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
-    
-    .orientation-content {
-        max-width: 400px;
-        padding: 30px;
-        background: rgba(10, 10, 10, 0.9);
-        border-radius: 10px;
-        border: 2px solid var(--neon-red);
-    }
-    
-    .orientation-content h2 {
-        color: var(--neon-red);
-        margin-bottom: 20px;
+        display: none !important;
     }
     
     @supports (padding: max(0px)) {
@@ -515,16 +489,66 @@
         .btn-pro { margin-bottom: max(10px, env(safe-area-inset-bottom)); }
     }
 
+    /* Portrait-specific adjustments */
+    @media (orientation: portrait) {
+        #hud {
+            top: max(15px, env(safe-area-inset-top));
+        }
+        
+        .top-message {
+            top: clamp(80px, 15vh, 120px);
+        }
+        
+        .car-grid {
+            grid-template-columns: repeat(2, 1fr); /* 2 columns in portrait */
+        }
+        
+        .car-option {
+            min-height: clamp(100px, 25vh, 140px);
+        }
+    }
+
+    /* Landscape-specific adjustments */
+    @media (orientation: landscape) {
+        #hud {
+            top: 15px;
+            left: max(15px, env(safe-area-inset-left));
+        }
+        
+        .top-message {
+            top: clamp(60px, 10vh, 100px);
+        }
+        
+        .car-grid {
+            grid-template-columns: repeat(3, 1fr); /* 3 columns in landscape */
+        }
+        
+        .car-option {
+            min-height: clamp(80px, 20vh, 120px);
+        }
+        
+        /* Smaller overlays in landscape */
+        .overlay {
+            padding: 20px 15px;
+        }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 350px) {
+        .car-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .car-option {
+            padding: 8px;
+        }
+    }
+
   </style>
 </head>
 <body>
-    <div id="orientationWarning">
-        <div class="orientation-content">
-            <h2>📱 Please Rotate Device</h2>
-            <p>For the best experience, please rotate your device to landscape mode.</p>
-            <p>Road Rage 2D is designed to be played in landscape orientation.</p>
-        </div>
-    </div>
+    <!-- Orientation warning REMOVED - game works in both -->
     
     <div id="fpsCounter">FPS: 60</div>
     
@@ -668,11 +692,9 @@
     }
     
     // ===== SCREEN ADAPTATION =====
-    let GAME_WIDTH = 500;
-    let GAME_HEIGHT = 800;
+    // REMOVED fixed GAME_WIDTH/GAME_HEIGHT - Now dynamic
     let canvasWidth, canvasHeight;
     let scaleX, scaleY;
-    let offsetX, offsetY;
     
     // ===== PERFORMANCE =====
     let lastTime = 0;
@@ -710,7 +732,6 @@
     const carGrid = document.getElementById("carGrid");
     const selectedCarPreview = document.getElementById("selectedCarPreview");
     const fpsCounter = document.getElementById("fpsCounter");
-    const orientationWarning = document.getElementById("orientationWarning");
     
     // ===== GAME VARIABLES =====
     let highScore = Number(localStorage.getItem("rr_high_pro")) || 0;
@@ -736,52 +757,60 @@
     let inputDir = 0;
     let playerImg, enemyImgs;
     
+    // Game design dimensions (logical units)
+    const LOGICAL_WIDTH = 500;
+    const LOGICAL_HEIGHT = 800;
+    let LANES = [];
+    
     // ===== SCREEN FUNCTIONS =====
     function resizeGame() {
         const containerWidth = gameContainer.clientWidth;
         const containerHeight = gameContainer.clientHeight;
         
-        const gameAspect = GAME_WIDTH / GAME_HEIGHT;
-        const containerAspect = containerWidth / containerHeight;
+        // Set canvas to full container size
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+        canvas.style.width = containerWidth + 'px';
+        canvas.style.height = containerHeight + 'px';
         
-        if (containerAspect > gameAspect) {
-            canvasHeight = containerHeight;
-            canvasWidth = canvasHeight * gameAspect;
-            offsetX = (containerWidth - canvasWidth) / 2;
-            offsetY = 0;
-        } else {
-            canvasWidth = containerWidth;
-            canvasHeight = canvasWidth / gameAspect;
-            offsetX = 0;
-            offsetY = (containerHeight - canvasHeight) / 2;
-        }
+        // Calculate scaling factors
+        scaleX = containerWidth / LOGICAL_WIDTH;
+        scaleY = containerHeight / LOGICAL_HEIGHT;
         
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
-        canvas.style.width = canvasWidth + 'px';
-        canvas.style.height = canvasHeight + 'px';
-        canvas.style.left = offsetX + 'px';
-        canvas.style.top = offsetY + 'px';
+        // Adjust lanes for current screen size
+        updateLanes();
         
-        scaleX = canvasWidth / GAME_WIDTH;
-        scaleY = canvasHeight / GAME_HEIGHT;
-        adjustGameElements();
-    }
-    
-    function adjustGameElements() {
-        LANES[0] = 85 * scaleX;
-        LANES[1] = 165 * scaleX;
-        LANES[2] = 245 * scaleX;
-        LANES[3] = 325 * scaleX;
-        LANES[4] = 405 * scaleX;
-        
+        // Update car position if game is active
         if (gameStarted && car) {
-            car.x = Math.max(60 * scaleX, Math.min(car.x, 440 * scaleX - car.w));
-            car.y = GAME_HEIGHT * scaleY - 150 * scaleY;
+            const maxX = 440 * scaleX - car.w;
+            car.x = Math.max(60 * scaleX, Math.min(car.x, maxX));
+            car.y = containerHeight - 150 * scaleY;
+            
+            // Update car dimensions
+            car.w = 50 * scaleX;
+            car.h = 90 * scaleY;
+            
+            // Update all enemies
+            enemies.forEach(e => {
+                e.w = 50 * scaleX;
+                e.h = 90 * scaleY;
+                e.x = Math.max(60 * scaleX, Math.min(e.x, maxX));
+            });
         }
+        
+        console.log(`📱 Resized: ${containerWidth}x${containerHeight}, scale: ${scaleX.toFixed(2)}x${scaleY.toFixed(2)}`);
     }
     
-    const LANES = [85, 165, 245, 325, 405];
+    function updateLanes() {
+        // Dynamically calculate lane positions based on screen width
+        const containerWidth = gameContainer.clientWidth;
+        const laneWidth = containerWidth / 5;
+        
+        LANES = [];
+        for (let i = 1; i <= 5; i++) {
+            LANES.push(laneWidth * i - laneWidth/2 - 25 * scaleX);
+        }
+    }
     
     // ===== INPUT HANDLING =====
     function getTouchPosition(clientX, clientY) {
@@ -806,14 +835,14 @@
     canvas.addEventListener("touchstart", e => {
         e.preventDefault();
         const touch = getTouchPosition(e.touches[0].clientX, e.touches[0].clientY);
-        inputDir = touch.x < GAME_WIDTH / 2 ? -1 : 1;
+        inputDir = touch.x < LOGICAL_WIDTH / 2 ? -1 : 1;
     }, { passive: false });
     
     canvas.addEventListener("touchend", () => inputDir = 0, { passive: false });
     
     canvas.addEventListener("mousedown", e => {
         const pos = getTouchPosition(e.clientX, e.clientY);
-        inputDir = pos.x < GAME_WIDTH / 2 ? -1 : 1;
+        inputDir = pos.x < LOGICAL_WIDTH / 2 ? -1 : 1;
     });
     
     window.addEventListener("mouseup", () => inputDir = 0);
@@ -1065,9 +1094,12 @@
     
     // ===== GAME INITIALIZATION =====
     function initGame() {
+        const containerWidth = gameContainer.clientWidth;
+        const containerHeight = gameContainer.clientHeight;
+        
         car = { 
             x: 230 * scaleX,
-            y: GAME_HEIGHT * scaleY - 150 * scaleY,
+            y: containerHeight - 150 * scaleY,
             w: 50 * scaleX,
             h: 90 * scaleY,
             img: playerImg,
@@ -1110,10 +1142,14 @@
         pauseBtn.classList.remove("paused");
         topMessage.style.opacity = "0";
         
-        for (let i = 0; i < GAME_HEIGHT; i += 80) {
-            roadLines.push({ y: i * scaleY });
-            sideMarkers.push({ y: i * scaleY });
+        // Initialize road lines and markers based on current height
+        for (let i = 0; i < containerHeight; i += 80 * scaleY) {
+            roadLines.push({ y: i });
+            sideMarkers.push({ y: i });
         }
+        
+        // Update lanes
+        updateLanes();
         
         lastTime = 0;
         fps = 60;
@@ -1198,28 +1234,35 @@
     }
     
     function drawRoad() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const containerWidth = gameContainer.clientWidth;
+        const containerHeight = gameContainer.clientHeight;
         
+        ctx.clearRect(0, 0, containerWidth, containerHeight);
+        
+        // Draw road background
         ctx.fillStyle = "#141414";
-        ctx.fillRect(50 * scaleX, 0, 400 * scaleX, canvas.height);
+        ctx.fillRect(50 * scaleX, 0, 400 * scaleX, containerHeight);
         
+        // Draw road lines
         roadLines.forEach(l => {
             l.y += speed * scaleY;
-            if (l.y > canvas.height) l.y = -80 * scaleY;
+            if (l.y > containerHeight) l.y = -80 * scaleY;
             ctx.fillStyle = "#bbb";
-            ctx.fillRect(canvas.width/2 - 5 * scaleX, l.y, 10 * scaleX, 40 * scaleY);
+            ctx.fillRect(containerWidth/2 - 5 * scaleX, l.y, 10 * scaleX, 40 * scaleY);
         });
         
+        // Draw side markers
         sideMarkers.forEach(s => {
             s.y += speed * scaleY;
-            if (s.y > canvas.height) s.y = -80 * scaleY;
+            if (s.y > containerHeight) s.y = -80 * scaleY;
             ctx.fillStyle = "#444";
             ctx.fillRect(50 * scaleX, s.y, 2 * scaleX, 40 * scaleY);
-            ctx.fillRect(448 * scaleX, s.y, 2 * scaleX, 40 * scaleY);
+            ctx.fillRect(containerWidth - 50 * scaleX, s.y, 2 * scaleX, 40 * scaleY);
         });
         
+        // Subtle road light wash
         ctx.fillStyle = "rgba(255,255,255,0.08)";
-        ctx.fillRect(50 * scaleX, 0, 400 * scaleX, canvas.height);
+        ctx.fillRect(50 * scaleX, 0, 400 * scaleX, containerHeight);
     }
     
     function drawPowerEffects() {
@@ -1461,20 +1504,6 @@
         stopMusic();
     }
     
-    // ===== ORIENTATION HANDLING =====
-    function checkOrientation() {
-        const isPortrait = window.innerHeight > window.innerWidth;
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile && isPortrait) {
-            orientationWarning.style.display = 'flex';
-            return false;
-        } else {
-            orientationWarning.style.display = 'none';
-            return true;
-        }
-    }
-    
     // ===== MAIN GAME LOOP =====
     function gameLoop(timestamp) {
         frameCount++;
@@ -1524,8 +1553,9 @@
             }
             
             const moveSpeed = 7 * scaleX;
+            const maxX = 440 * scaleX - car.w;
             car.x += inputDir * moveSpeed;
-            car.x = Math.max(60 * scaleX, Math.min(car.x, 440 * scaleX - car.w));
+            car.x = Math.max(60 * scaleX, Math.min(car.x, maxX));
             
             let distanceGained = speed / 12;
             distance += distanceGained;
@@ -1569,12 +1599,14 @@
                 spawnTimer = 0;
             }
             
+            const containerHeight = gameContainer.clientHeight;
+            
             enemies.forEach((e, i) => {
                 e.y += speed * scaleY;
                 
                 if (hit(car, e)) {
                     if (powerState === "SHIELD" && car.shield && powerTimer > 0) {
-                        e.y = canvas.height + 200 * scaleY;
+                        e.y = containerHeight + 200 * scaleY;
                         powerTimer = Math.max(0, powerTimer - 50);
                         car.shield = false;
                         powerText.textContent = "POWER: SHIELD (USED)";
@@ -1597,7 +1629,7 @@
                 }
             });
             
-            enemies = enemies.filter(e => e.y < canvas.height + 120 * scaleY);
+            enemies = enemies.filter(e => e.y < containerHeight + 120 * scaleY);
             
             drawAllEnemies();
             drawPlayer(car);
@@ -1614,13 +1646,16 @@
                 powerMsgTimer--;
             }
             
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = "#fff";
-            ctx.font = `${12 * scaleX}px sans-serif`;
-            ctx.textAlign = "left";
-            ctx.fillText(`Speed: ${speed.toFixed(1)} | Car: ${carDatabase[selectedCarIndex].name}`, 20 * scaleX, canvas.height - 20 * scaleY);
-            ctx.restore();
+            // Show speed and car name (only if enough space)
+            if (canvas.width > 300) {
+                ctx.save();
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = "#fff";
+                ctx.font = `${12 * scaleX}px sans-serif`;
+                ctx.textAlign = "left";
+                ctx.fillText(`Speed: ${speed.toFixed(1)} | Car: ${carDatabase[selectedCarIndex].name}`, 20 * scaleX, canvas.height - 20 * scaleY);
+                ctx.restore();
+            }
         } else if (!gameOver) {
             powerText.textContent = "";
             powerFill.style.width = "0%";
@@ -1646,14 +1681,13 @@
     
     // ===== INITIALIZATION =====
     window.addEventListener('load', () => {
-        checkOrientation();
+        // Initial resize
         resizeGame();
+        
+        // Set up resize handler
         window.addEventListener('resize', resizeGame);
         window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                checkOrientation();
-                resizeGame();
-            }, 300);
+            setTimeout(resizeGame, 300);
         });
         
         preloadImages(imageSources, (loadedImages) => {
