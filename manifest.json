@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
-  "orientation": "portrait",
+  "orientation": "any",  // CHANGED from "portrait" to "any"
   "scope": "./",
   "icons": [
     {
@@ -66,6 +66,13 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "High-speed highway action"
+    },
+    {
+      "src": "./screenshots/screenshot-landscape.png",
+      "sizes": "960x540",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Gameplay in landscape mode"
     }
   ],
   "shortcuts": [
@@ -74,19 +81,6 @@
       "short_name": "Play",
       "description": "Start a new game",
       "url": "./index.html?play",
-      "icons": [
-        {
-          "src": "./icons/icon-96.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Select Car",
-      "short_name": "Cars",
-      "description": "Choose your vehicle",
-      "url": "./index.html?select-car",
       "icons": [
         {
           "src": "./icons/icon-96.png",
