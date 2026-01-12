@@ -3,27 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>Offline - Road Rage 2D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#050505">
     <style>
         body { 
-            margin: 0; padding: 40px; 
+            margin: 0; padding: 20px; 
             background: #050505; color: white;
             font-family: sans-serif; text-align: center;
             display: flex; justify-content: center; align-items: center;
             height: 100vh;
+            box-sizing: border-box;
         }
-        .box { 
+        .container { 
             max-width: 400px; padding: 30px;
-            border: 1px solid #faff00; border-radius: 10px;
+            border: 2px solid #faff00; border-radius: 10px;
             background: rgba(20,20,20,0.9);
+            box-shadow: 0 0 30px rgba(250, 255, 0, 0.2);
         }
-        h1 { color: #faff00; }
+        h1 { color: #faff00; margin-top: 0; }
+        .status-box {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .status-label {
+            color: #aaa;
+        }
+        .status-value {
+            font-weight: bold;
+        }
+        .status-value.good {
+            color: #00ff00;
+        }
+        .status-value.warning {
+            color: #ffff00;
+        }
+        .status-value.bad {
+            color: #ff0000;
+        }
         button { 
             background: #faff00; color: black;
             border: none; padding: 15px 30px;
             font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 20px;
-            margin: 10px;
+            cursor: pointer; margin: 10px 0;
             width: 100%;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            background: white;
         }
         .button-container {
             display: flex;
@@ -31,42 +70,146 @@
             gap: 10px;
             margin-top: 20px;
         }
+        .offline-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        .info-text {
+            color: #aaa;
+            font-size: 14px;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>⚠️ Road Rage 2D is Offline</h1>
+    <div class="container">
+        <div class="offline-icon">⚠️</div>
+        <h1>Road Rage 2D is Offline</h1>
         <p>The game is cached on your device!</p>
         <p>Connect to internet once to update, then play anytime offline.</p>
         
+        <div class="status-box" id="cacheStatus">
+            <div class="status-item">
+                <span class="status-label">Connection Status:</span>
+                <span class="status-value" id="connectionStatus">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Cached Game Files:</span>
+                <span class="status-value" id="cachedFiles">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Car Images:</span>
+                <span class="status-value" id="carImages">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Music Tracks:</span>
+                <span class="status-value" id="musicTracks">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Game Ready:</span>
+                <span class="status-value" id="gameReady">Checking...</span>
+            </div>
+        </div>
+        
+        <p class="info-text">🎮 Game can run completely offline once cached</p>
+        <p class="info-text">📱 Add to Home Screen for instant access</p>
+        <p class="info-text">⚡ No internet required after first load</p>
+        
         <div class="button-container">
             <button onclick="location.reload()">↻ Retry Connection</button>
-            <button onclick="checkCache()">📦 Check Cache Status</button>
-            <button onclick="goToGame()">🎮 Try Load Game</button>
+            <button onclick="checkCache()">📦 Refresh Cache Status</button>
+            <button onclick="goToGame()" id="playButton">🎮 Try Load Game</button>
+            <button onclick="clearCache()" style="background: rgba(255,100,100,0.2); color: #ff6464;">🗑️ Clear Cache</button>
         </div>
     </div>
 
     <script>
+        let cacheStatus = {
+            total: 0,
+            images: 0,
+            music: 0,
+            html: 0,
+            ready: false
+        };
+        
+        function updateStatusDisplay() {
+            document.getElementById('connectionStatus').textContent = 
+                navigator.onLine ? '🌐 Online' : '⚫ Offline';
+            document.getElementById('connectionStatus').className = 
+                'status-value ' + (navigator.onLine ? 'good' : 'warning');
+            
+            document.getElementById('cachedFiles').textContent = cacheStatus.total + ' files';
+            document.getElementById('cachedFiles').className = 'status-value ' + 
+                (cacheStatus.total > 15 ? 'good' : cacheStatus.total > 5 ? 'warning' : 'bad');
+            
+            document.getElementById('carImages').textContent = cacheStatus.images + '/9';
+            document.getElementById('carImages').className = 'status-value ' + 
+                (cacheStatus.images >= 9 ? 'good' : cacheStatus.images >= 5 ? 'warning' : 'bad');
+            
+            document.getElementById('musicTracks').textContent = cacheStatus.music + '/5';
+            document.getElementById('musicTracks').className = 'status-value ' + 
+                (cacheStatus.music >= 5 ? 'good' : cacheStatus.music >= 2 ? 'warning' : 'bad');
+            
+            const gameReady = cacheStatus.images >= 9 && cacheStatus.music >= 5;
+            document.getElementById('gameReady').textContent = gameReady ? '✅ YES' : '❌ NO';
+            document.getElementById('gameReady').className = 'status-value ' + (gameReady ? 'good' : 'bad');
+            
+            const playButton = document.getElementById('playButton');
+            if (gameReady) {
+                playButton.innerHTML = '🎮 PLAY OFFLINE';
+                playButton.style.background = '#00ff00';
+                playButton.style.color = 'black';
+            } else {
+                playButton.innerHTML = '🎮 Try Load Game';
+                playButton.style.background = '#faff00';
+                playButton.style.color = 'black';
+            }
+        }
+        
         function checkCache() {
-            if ('caches' in window) { 
-                caches.open('road-rage-complete-v1.0').then(c => {
-                    c.keys().then(keys => {
-                        const audioFiles = keys.filter(k => k.url.includes('.m4a'));
-                        const images = keys.filter(k => k.url.includes('.png'));
-                        const htmlFiles = keys.filter(k => k.url.includes('.html'));
-                        
-                        alert(`🎮 ROAD RAGE 2D - OFFLINE STATUS\n\n` +
-                              `📁 Total Files: ${keys.length}\n` +
-                              `🚗 Car Images: ${images.length}/9\n` +
-                              `🎵 Music Tracks: ${audioFiles.length}/5\n` +
-                              `📄 Game Pages: ${htmlFiles.length}\n\n` +
-                              `Status: ${audioFiles.length >= 5 && images.length >= 9 ? 
-                                '✅ FULLY READY OFFLINE' : 
-                                '⚠️ PARTIALLY CACHED'}\n\n` +
-                              `${audioFiles.length >= 5 ? '🎵 Music ready offline!' : 'Connect online for full music.'}`);
-                    });
+            if ('caches' in window) {
+                caches.open('road-rage-pro-v2.2').then(cache => {
+                    return cache.keys();
+                }).then(keys => {
+                    cacheStatus.total = keys.length;
+                    cacheStatus.images = keys.filter(k => k.url.includes('imahe/')).length;
+                    cacheStatus.music = keys.filter(k => k.url.includes('music/')).length;
+                    cacheStatus.html = keys.filter(k => k.url.includes('.html')).length;
+                    cacheStatus.ready = cacheStatus.images >= 9 && cacheStatus.music >= 5;
+                    
+                    updateStatusDisplay();
+                    
+                    // Show summary alert
+                    if (cacheStatus.ready) {
+                        setTimeout(() => {
+                            alert(`🎮 ROAD RAGE 2D - OFFLINE READY!\n\n` +
+                                  `📁 Total Files: ${cacheStatus.total}\n` +
+                                  `🚗 Car Images: ${cacheStatus.images}/9 ✅\n` +
+                                  `🎵 Music Tracks: ${cacheStatus.music}/5 ✅\n` +
+                                  `Status: FULLY READY OFFLINE!\n\n` +
+                                  `You can play the game without internet!`);
+                        }, 500);
+                    } else {
+                        setTimeout(() => {
+                            alert(`🎮 ROAD RAGE 2D - CACHE STATUS\n\n` +
+                                  `📁 Total Files: ${cacheStatus.total}\n` +
+                                  `🚗 Car Images: ${cacheStatus.images}/9 ${cacheStatus.images >= 9 ? '✅' : '❌'}\n` +
+                                  `🎵 Music Tracks: ${cacheStatus.music}/5 ${cacheStatus.music >= 5 ? '✅' : '❌'}\n` +
+                                  `Status: ${cacheStatus.images >= 9 && cacheStatus.music >= 5 ? 
+                                    'FULLY READY' : 'NEEDS INTERNET'}\n\n` +
+                                  `${!navigator.onLine ? 'Connect to internet to cache missing files.' : 
+                                    'Files are being cached in background.'}`);
+                        }, 500);
+                    }
                 }).catch(err => {
-                    alert('Cache check failed: ' + err);
+                    console.log('Cache check failed:', err);
+                    cacheStatus.total = 0;
+                    cacheStatus.images = 0;
+                    cacheStatus.music = 0;
+                    cacheStatus.ready = false;
+                    updateStatusDisplay();
+                    alert('Cache check failed. The game may not be installed yet.');
                 });
             } else {
                 alert('Cache API not supported in this browser.');
@@ -74,24 +217,54 @@
         }
         
         function goToGame() {
-            // Try to load the main game
-            window.location.href = 'index.html';
+            if (cacheStatus.ready) {
+                window.location.href = './index.html';
+            } else {
+                const shouldTry = confirm('Game may not be fully cached.\n' +
+                    'Some features might not work offline.\n' +
+                    'Try loading anyway?');
+                if (shouldTry) {
+                    window.location.href = './index.html';
+                }
+            }
         }
         
-        // Auto-check cache on page load
+        function clearCache() {
+            if (confirm('Are you sure you want to clear the game cache?\n' +
+                       'You will need internet connection to download the game again.')) {
+                if ('caches' in window) {
+                    caches.delete('road-rage-pro-v2.2').then(() => {
+                        alert('Cache cleared! Refresh page to see changes.');
+                        checkCache();
+                    });
+                } else {
+                    alert('Cache API not available.');
+                }
+            }
+        }
+        
+        // Auto-check on page load
         window.addEventListener('load', function() {
             console.log('Offline page loaded');
+            checkCache();
             
-            // Check if we have game files cached
-            if ('caches' in window) {
-                caches.match('index.html').then(response => {
-                    if (response) {
-                        console.log('Game is cached, you can play offline!');
-                    } else {
-                        console.log('Game not cached yet. Need internet connection.');
-                    }
-                });
+            // Check connection
+            if (navigator.onLine) {
+                console.log('Device is online - caching in background');
+            } else {
+                console.log('Device is offline - using cached version');
             }
+            
+            // Listen for online/offline events
+            window.addEventListener('online', () => {
+                console.log('Came back online');
+                checkCache();
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('Went offline');
+                checkCache();
+            });
         });
     </script>
 </body>
